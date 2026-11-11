@@ -1,0 +1,16 @@
+{
+  "name": "同欣回報",
+  "short_name": "同欣回報",
+  "description": "同欣業務回報客戶與案件進度（App 內主題：同欣冒險者公會）",
+  "lang": "zh-Hant-TW",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f3ede0",
+  "theme_color": "#1f2a44",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

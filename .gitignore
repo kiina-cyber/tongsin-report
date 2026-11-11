@@ -1,0 +1,5 @@
+node_modules/
+tests/_app.html
+tests/_*.html
+.DS_Store
+Thumbs.db

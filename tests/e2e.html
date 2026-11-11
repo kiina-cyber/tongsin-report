@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><title>e2e</title></head>
+<body>
+<iframe id="app" style="width:375px;height:800px;border:1px solid #888"></iframe>
+<pre id="log"></pre>
+<!-- 外層頁面扮演 Google 伺服器 -->
+<script src="fake-gas.js"></script>
+<script src="../docs/shared.js"></script>
+<script src="../apps-script/Code.gs"></script>
+<script>
+const out = [], fails = [];
+const ok = (cond, msg) => { out.push((cond ? '✓ ' : '✗ ') + msg); if(!cond) fails.push(msg); };
+window.__online = true; window.__alerts = []; window.__confirmAnswer = true;
+window.__confirm = () => window.__confirmAnswer;
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const frame = document.getElementById('app');
+let w;
+const load = () => new Promise(r => { frame.onload = () => { w = frame.contentWindow; r(); }; frame.src = '_app.html?' + Date.now(); });
+const sheetRows = n => { const s = __gasBook.getSheetByName(n); return s._data.slice(1, s.getLastRow()); };
+const text = () => w.document.body.innerText;
+const until = async (fn, ms = 3000) => { const t = Date.now(); while(Date.now() - t < ms){ if(fn()) return true; await wait(30); } return false; };
+const goOffline = () => { __online = false; w.dispatchEvent(new Event('offline')); };
+const goOnline = () => { __online = true; w.dispatchEvent(new Event('online')); };
+
+(async function(){
+  try{
+    setup();
+    const roster = __gasCall({ action:'roster' }).users;
+    const s1 = roster.find(u => u.name === '業務一號'), s2 = roster.find(u => u.name === '業務二號'), boss = roster.find(u => u.role === 'boss');
+    await load(); w.localStorage.clear(); await load();
+
+    // 1. 登入
+    ok(await until(() => text().includes('業務一號')), '登入畫面從伺服器載入名單');
+    w.pickUser(s1.id); [9,9,9,9].forEach(k => w.pinKey(k));
+    ok(await until(() => text().includes('密碼不對')), '密碼錯誤會提示');
+    [1,1,1,1].forEach(k => w.pinKey(k));
+    ok(await until(() => w.me() && w.me().id === s1.id), '正確密碼登入成功');
+
+    // 2. 新手教學與建立角色
+    ok(await until(() => w.dlg), '新人看到艾拉教學');
+    w.dlgNext(); w.dlgNext();
+    ok(w.ui.page === 'create', '進入建立角色');
+    w.ui.draft = { cls:'mage', g:'f', hair:'long', hc:6, outfit:1 }; w.finishCreate();
+    w.dlgNext(); w.dlgNext(); w.dlgNext();
+    ok(w.ui.tutAdd === true, '教學引導去新增客戶');
+
+    // 3. 有網路時新增客戶
+    w.startAdd(); w.document.getElementById('a-name').value = 'A酒店';
+    w.pickOpt('cat', '沉浸式包廂', w.document.querySelectorAll('.opt[data-g=cat]')[1]);
+    w.addPInput(Object.assign(w.document.getElementById('a-p'), { value:15 })); w.addCase();
+    ok(await until(() => w.Q.length === 0 && sheetRows('案件').length === 1), '新增客戶後自動同步到試算表');
+    w.dlg && (w.dlg = null, w.drawDlg()); w.document.getElementById('fx').innerHTML = '';
+    ok(sheetRows('業務').find(r => r[0] === s1.id)[6].includes('mage'), '角色外觀存進試算表');
+    ok(sheetRows('業務').find(r => r[0] === s1.id)[7] === '是', '教學完成存進試算表');
+    ok(await until(() => text().includes('已同步')), '右上角顯示「已同步」');
+    const caseA = w.S.cases[0].id;
+
+    // 4. 斷網：繼續新增、更新
+    goOffline();
+    ok(await until(() => text().includes('離線')), '斷網時顯示離線');
+    w.startAdd(); w.document.getElementById('a-name').value = '星光KTV';
+    w.addPInput(Object.assign(w.document.getElementById('a-p'), { value:30 })); w.addCase();
+    w.openCase(caseA); w.setStage(2); w.document.getElementById('f-note').value = '離線時更新：已報價'; w.saveCase();
+    w.document.getElementById('fx').innerHTML = '';
+    ok(w.Q.length >= 4, '離線時的修改都放進待同步佇列（' + w.Q.length + ' 筆）');
+    ok(sheetRows('案件').length === 1, '離線時還沒送到伺服器');
+    ok(await until(() => /離線・\d+ 筆待同步/.test(text())), '顯示「離線・N 筆待同步」');
+    ok(w.S.cases.length === 2 && w.S.cases.find(c => c.id === caseA).stage === 2, '手機上已經看得到離線的修改');
+
+    // 5. 離線狀態下關掉 App 再打開
+    const qBefore = w.Q.length;
+    await load();
+    ok(await until(() => w.me() && w.ui.page === 'home'), '離線重開 App 仍是登入狀態，直接進首頁');
+    ok(w.Q.length === qBefore && w.S.cases.length === 2, '重開後資料和待同步佇列都還在');
+    ok(text().includes('星光KTV') && text().includes('A酒店'), '首頁看得到兩個客戶');
+
+    // 6. 業務還在離線時，老闆從另一台裝置留言、把星光KTV轉給業務二號
+    const LB = __gasCall({ action:'login', uid:boss.id, pin:'0000' });
+    ok(LB.ok, '老闆在另一台裝置登入');
+    __gasCall({ action:'sync', token:LB.token, ops:[
+      { id:'b1', type:'bossComment', caseId:caseA, hist:{ id:'bh1', t:Date.now(), by:boss.id, kind:'boss', note:'這家我認識老闆' } } ]});
+
+    // 7. 恢復網路
+    goOnline();
+    ok(await until(() => w.Q.length === 0 && !w.syncing, 5000), '恢復網路後自動同步完畢');
+    ok(sheetRows('案件').length === 2, '試算表有 2 個客戶');
+    const rowA = sheetRows('案件').find(r => r[0] === caseA);
+    ok(rowA[6] === '報價' && rowA[9] === '進行中', '離線時的更新寫進試算表（報價）');
+    ok(sheetRows('更新紀錄').some(r => r[11] === '離線時更新：已報價'), '離線寫的備註也寫進更新紀錄');
+    const xpSheet = sheetRows('業務').find(r => r[0] === s1.id)[5];
+    ok(xpSheet === w.me().xp && xpSheet === 10 + 10 + 20 + 5, '經驗值手機和試算表一致（' + xpSheet + ' XP）');
+    w.go('home');
+    ok(await until(() => text().includes('會長有新留言')), '業務看到會長在離線期間留的言');
+
+    // 8. 衝突：業務離線改某案件，同時老闆把它轉走
+    const caseB = w.S.cases.find(c => c.name === '星光KTV').id;
+    goOffline();
+    w.openCase(caseB); w.document.getElementById('f-note').value = '再追一次'; w.saveCase(); w.document.getElementById('fx').innerHTML = '';
+    __gasCall({ action:'sync', token:LB.token, ops:[
+      { id:'b2', type:'transfer', caseId:caseB, to:s2.id, hist:{ id:'bh2', t:Date.now(), by:boss.id, kind:'boss', note:'轉派給業務二號' } } ]});
+    goOnline();
+    ok(await until(() => w.Q.length === 0 && !w.syncing, 5000), '衝突時同步不會卡住');
+    ok(!w.S.cases.some(c => c.id === caseB), '被轉走的案件從業務一號手機上消失');
+    ok(await until(() => text().includes('沒有寫入雲端')), '被拒絕的修改會提示業務');
+
+    // 9. 有未同步資料時登出要確認
+    goOffline();
+    w.openCase(caseA); w.document.getElementById('f-note').value = '登出前的備註'; w.saveCase(); w.document.getElementById('fx').innerHTML = '';
+    __confirmAnswer = false; await w.logout();
+    ok(w.me() && w.Q.length > 0, '有未同步資料時，選「取消」就不會登出');
+    goOnline();
+    ok(await until(() => w.Q.length === 0 && !w.syncing, 5000), '恢復網路後同步完');
+    // 業務自己改密碼
+    w.go('pin'); const pv = id => w.document.getElementById(id);
+    pv('p-old').value = '1111'; pv('p-new').value = '2468'; pv('p-new2').value = '1357'; await w.savePin();
+    ok(text().includes('兩次輸入的新密碼不一樣'), '兩次新密碼不同會提示');
+    pv('p-new2').value = '2468'; await w.savePin();
+    ok(w.ui.page === 'settings' && sheetRows('業務').find(r => r[0] === s1.id)[2] === '2468', '業務在 App 裡改密碼，寫進試算表');
+    __confirmAnswer = true; await w.logout();
+    ok(!w.me() && !w.TOKEN, '同步完可以正常登出');
+
+    // 10. 老闆登入 App
+    ok(await until(() => text().includes('業務一號')), '登出後回到名單');
+    w.pickUser(boss.id); [0,0,0,0].forEach(k => w.pinKey(k));
+    ok(await until(() => w.ui.page === 'lobby'), '老闆登入後進入公會大廳');
+    w.dlg && (w.dlg = null, w.drawDlg());
+    ok(w.S.cases.length === 2, '老闆看得到全部 2 個案件');
+    ok(text().includes('匯出 Excel'), '老闆有匯出按鈕');
+
+    // 老闆在 App 裡管理成員
+    w.go('settings'); ok(text().includes('成員管理'), '老闆的設定頁有「成員管理」');
+    w.go('members'); ok(text().includes('業務一號') && text().includes('業務二號'), '成員管理列出所有成員');
+    const mv = id => w.document.getElementById(id);
+    w.editMember(null); mv('m-name').value = '陳美玲'; mv('m-pin').value = '43'; await w.saveMember();
+    ok(text().includes('密碼要是 4 位數字'), '新增時密碼格式錯誤會提示');
+    mv('m-pin').value = '4321'; await w.saveMember();
+    ok(w.ui.page === 'members' && text().includes('陳美玲') && sheetRows('業務').some(r => r[1] === '陳美玲' && r[2] === '4321'), '在 App 新增業務，寫進試算表');
+    ok(__gasCall({ action:'roster' }).users.some(u => u.name === '陳美玲'), '新業務出現在登入名單');
+    const mei = w.S.members.find(m => m.name === '陳美玲');
+    w.editMember(mei.id); mv('m-pin').value = '9876'; w.ui.mActive = false; await w.saveMember();
+    const meiRow = sheetRows('業務').find(r => r[0] === mei.id);
+    ok(meiRow[2] === '9876' && meiRow[4] === '否' && text().includes('已停用'), '在 App 重設密碼並停用');
+    w.editMember(boss.id);
+    ok(w.document.querySelector('#app .toggle').disabled, '會長不能停用自己（開關鎖住）');
+    goOffline(); w.go('members');
+    ok(text().includes('需要網路'), '離線時成員管理會提示需要網路');
+    goOnline(); await until(() => !w.syncing);
+
+    // 11. 停用帳號
+    const us = __gasBook.getSheetByName('業務'); us._data.find(r => r[0] === boss.id)[4] = '否';
+    await w.sync();
+    ok(!w.me() && !w.TOKEN, '帳號被停用後會自動登出');
+    us._data.find(r => r[0] === boss.id)[4] = '是';
+  }catch(e){ fails.push('EXC ' + e.message); out.push('EXC ' + e.message + '\n' + e.stack); }
+  document.getElementById('log').textContent = out.join('\n');
+  document.title = 'DONE 通過 ' + (out.length - fails.length) + ' 失敗 ' + fails.length;
+})();
+</script>
+</body></html>

@@ -1,0 +1,1448 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1f2a44">
+<title>同欣回報</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="同欣回報">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&display=swap" rel="stylesheet">
+<style>
+/* 古典配色：象牙羊皮紙、墨藍、古金 */
+:root{
+  --bg:#f3ede0;--card:#fffdf8;--ink:#2a2622;--sub:#5e564c;--line:#3a3128;--edge:#cdb98f;
+  --navy:#1f2a44;--gold:#b8924a;--gold-d:#7a5c2a;--gold-l:#ecdcb4;
+  --red:#b5403a;--green:#3f8a4e;--blue:#3a64a6;--gray:#6e6860;--warn:#a5520f;--xp:#6a4fa8;
+}
+html{font-size:18px}
+html.big{font-size:22px}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Noto Serif TC","Songti TC","PMingLiU",serif;font-weight:500;line-height:1.55;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
+b,strong,h1,h2,th{font-weight:700}
+a{color:var(--blue);text-underline-offset:3px}
+.px{font-weight:700;letter-spacing:.04em}
+#app{max-width:480px;margin:0 auto;min-height:100vh;position:relative;padding-bottom:180px}
+svg.spr{display:block;image-rendering:pixelated}
+
+/* ── 裝飾 ── */
+/* 金色邊角：只用在重點卡片 */
+.card.orn,.fxbox.orn{background:
+  linear-gradient(var(--gold),var(--gold)) top 6px left 6px/14px 1.5px,
+  linear-gradient(var(--gold),var(--gold)) top 6px left 6px/1.5px 14px,
+  linear-gradient(var(--gold),var(--gold)) top 6px right 6px/14px 1.5px,
+  linear-gradient(var(--gold),var(--gold)) top 6px right 6px/1.5px 14px,
+  linear-gradient(var(--gold),var(--gold)) bottom 6px left 6px/14px 1.5px,
+  linear-gradient(var(--gold),var(--gold)) bottom 6px left 6px/1.5px 14px,
+  linear-gradient(var(--gold),var(--gold)) bottom 6px right 6px/14px 1.5px,
+  linear-gradient(var(--gold),var(--gold)) bottom 6px right 6px/1.5px 14px,
+  var(--card);background-repeat:no-repeat}
+.divider{display:block;margin:6px auto 0}
+
+/* layout */
+.topbar{background:var(--navy);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:4px double var(--gold)}
+.topbar h1{margin:0;font-size:1.2rem;color:var(--gold-l)}
+.topbar .back{background:none;border:1.5px solid var(--gold-l);color:#fff;border-radius:6px;min-height:44px;padding:0 14px;cursor:pointer}
+.card{background:var(--card);border:1.5px solid var(--edge);border-radius:8px;box-shadow:0 2px 0 #e2d4b2,0 6px 14px rgba(70,50,20,.07);padding:14px;margin:14px 16px}
+h2{font-size:1.1rem;margin:0 0 10px}
+.sec-title{margin:22px 16px 4px;font-size:1.1rem;display:flex;align-items:center;gap:8px}
+.sec-title:after{content:"";flex:1;height:1px;background:linear-gradient(90deg,var(--gold),transparent);margin-left:6px}
+.muted{color:var(--sub)}
+.hint{margin:10px 16px;color:var(--sub);font-size:.9rem}
+
+/* buttons */
+.btn{min-height:52px;border:1.5px solid var(--gold-d);border-radius:6px;box-shadow:0 2px 0 var(--gold-d);background:linear-gradient(#d9b874,#bf9850);color:#2a2216;font-weight:700;padding:0 18px;cursor:pointer}
+.btn:active{transform:translateY(2px);box-shadow:0 0 0 var(--gold-d)}
+.btn.ghost{background:var(--card)}
+.btn.danger{background:var(--card);color:var(--red);border-color:var(--red);box-shadow:0 2px 0 var(--red)}
+.btn.block{width:100%}
+.row{display:flex;gap:10px;align-items:center}
+.row>.btn{flex:1}
+
+/* status */
+.badge{display:inline-flex;align-items:center;gap:6px;padding:2px 12px;border-radius:999px;color:#fff;font-size:.9rem;font-weight:700;white-space:nowrap}
+.s-doing{background:var(--red)}.s-won{background:var(--green)}.s-quiet{background:var(--blue)}.s-no{background:var(--gray)}
+.warn{color:var(--warn);font-weight:700}
+
+/* profile */
+.profile{display:flex;gap:14px;align-items:center}
+.ava{border:3px solid #b8b0a0;border-radius:6px;background:linear-gradient(#efe6d2,#ddd0b4);padding:3px;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(255,255,255,.6)}
+.ptitle{font-size:1rem;color:var(--sub)}
+.pname{font-size:1.25rem;font-weight:700}
+.lv{color:var(--xp);font-size:1.1rem;margin-left:6px}
+.xpbar{height:14px;border:1.5px solid var(--gold-d);border-radius:7px;background:#ece4d2;overflow:hidden;margin-top:6px}
+.xpbar i{display:block;height:100%;background:linear-gradient(#8a72c4,var(--xp))}
+.xptext{font-size:.85rem;color:var(--sub);margin-top:2px}
+
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 16px}
+.chip{min-height:44px;padding:0 14px;border:1.5px solid var(--edge);border-radius:999px;background:var(--card);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.dot{width:12px;height:12px;border-radius:50%;display:inline-block;border:1.5px solid #fff}
+
+/* case card */
+.case{display:block;width:calc(100% - 32px);text-align:left;cursor:pointer}
+.case .r1{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.case .cat{color:var(--sub);font-size:.95rem}
+.cname{font-size:1.25rem;font-weight:700;margin:6px 0 4px}
+.owner{font-size:.95rem;color:var(--sub)}
+.prog{display:flex;align-items:center;gap:10px}
+.bar{flex:1;height:14px;border:1.5px solid #b9a780;border-radius:7px;background:#ece4d2;overflow:hidden}
+.bar i{display:block;height:100%}
+.pct{font-weight:700;white-space:nowrap}
+.meta{font-size:.95rem;margin-top:6px;color:var(--sub)}
+.case.stale{border-color:var(--warn);border-left:6px solid var(--warn)}
+
+/* FAB + nav */
+.fab{position:fixed;bottom:92px;left:50%;transform:translateX(-50%);min-height:60px;font-size:1.15rem;padding:0 28px;border-radius:999px;z-index:20;white-space:nowrap}
+.fab:active{transform:translateX(-50%) translateY(2px)}
+.pulse{animation:pulse 1.2s infinite}
+@keyframes pulse{0%,100%{box-shadow:0 2px 0 var(--gold-d),0 0 0 0 rgba(184,146,74,.8)}50%{box-shadow:0 2px 0 var(--gold-d),0 0 0 14px rgba(184,146,74,0)}}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--navy);display:flex;border-top:4px double var(--gold);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+.nav button{flex:1;min-height:72px;background:none;border:none;color:#cfd3e6;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.95rem}
+.nav button .ic{font-size:1.4rem;line-height:1}
+.nav button.on{color:var(--gold-l);background:rgba(255,255,255,.07)}
+
+/* forms */
+label.f,div.f{display:block;margin:0 0 16px}
+label.f>span{display:block;font-weight:700;margin-bottom:4px}
+.inp{width:100%;min-height:52px;border:1.5px solid #b9a780;border-radius:6px;padding:8px 12px;background:#fff}
+textarea.inp{min-height:90px;resize:vertical}
+.req{color:var(--red)}
+input[type=range]{--p:0;width:100%;height:48px;-webkit-appearance:none;appearance:none;background:transparent;margin:0}
+input[type=range]::-webkit-slider-runnable-track{height:16px;border:1.5px solid var(--gold-d);border-radius:8px;background:linear-gradient(to right,var(--gold) calc(var(--p)*1%),#ece4d2 0)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;margin-top:-11px;background:var(--card);border:2px solid var(--gold-d);border-radius:50%;box-shadow:0 2px 0 var(--gold-d)}
+input[type=range]::-moz-range-track{height:14px;border:1.5px solid var(--gold-d);border-radius:8px;background:#ece4d2}
+input[type=range]::-moz-range-progress{height:14px;background:var(--gold);border-radius:8px}
+input[type=range]::-moz-range-thumb{width:30px;height:30px;background:var(--card);border:2px solid var(--gold-d);border-radius:50%}
+.bigpct{font-size:1.6rem;color:var(--ink)}
+.stgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stbtn{min-height:56px;border:2.5px solid var(--c);border-radius:6px;background:var(--card);color:var(--c);font-weight:700;cursor:pointer}
+.stbtn.on{background:var(--c);color:#fff;border-color:var(--line);box-shadow:0 2px 0 var(--line)}
+
+/* timeline */
+.tl{list-style:none;margin:0;padding:0}
+.tl li{border-left:2px solid var(--gold);padding:0 0 14px 16px;position:relative}
+.tl li:before{content:"";position:absolute;left:-7px;top:6px;width:10px;height:10px;background:var(--navy);border:1.5px solid var(--gold);transform:rotate(45deg)}
+.tl .when{font-size:.9rem;color:var(--sub)}
+.tl .note{background:#f7f0e2;border-radius:6px;padding:6px 10px;margin-top:4px}
+.tl .note.boss{background:#f6ead0;border-left:3px solid var(--gold)}
+.bossflag{display:inline-block;background:#f6ead0;border:1px solid var(--gold);color:#6a4a14;border-radius:999px;padding:0 10px;font-size:.9rem;margin-bottom:4px}
+
+/* login */
+.hero{text-align:center;padding:26px 16px 14px;background:radial-gradient(ellipse at top,#2c3a5c,var(--navy) 70%);color:#fff;border-bottom:4px double var(--gold)}
+.hero h1{font-size:1.7rem;margin:10px 0 0;color:var(--gold-l)}
+.hero .en{color:#cfc3a0;font-size:.85rem;letter-spacing:.35em;margin-top:2px}
+.hero .ava{display:inline-block}
+.namegrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.namegrid .btn{background:var(--card);font-size:1.1rem}
+.namegrid .btn.boss{grid-column:1/-1;background:linear-gradient(#f3e6c4,#e3cf9c)}
+.pins{display:flex;justify-content:center;gap:14px;margin:14px 0}
+.pins i{width:20px;height:20px;border:2px solid var(--gold-d);border-radius:50%}
+.pins i.f{background:var(--navy);border-color:var(--navy)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.keypad .btn{background:var(--card);font-size:1.4rem;min-height:64px}
+.err{color:var(--red);text-align:center;font-weight:700;min-height:1.5em}
+
+/* character creator */
+.preview{display:flex;justify-content:center;padding:12px;background:radial-gradient(ellipse at 50% 35%,#f8f1e0,#ddcfae);border:1.5px solid var(--edge);border-radius:6px}
+.opts{display:grid;gap:8px}
+.opts.c5{grid-template-columns:repeat(5,1fr)}
+.opts.c3{grid-template-columns:repeat(3,1fr)}
+.opts.c2{grid-template-columns:repeat(2,1fr)}
+.opt{min-height:52px;border:1.5px solid var(--edge);border-radius:6px;background:var(--card);cursor:pointer;padding:6px 2px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.95rem}
+.flabel{display:block;font-weight:700;margin-bottom:6px}
+.phint{background:#fbf3e0;border:1.5px dashed var(--gold);border-radius:6px;padding:8px 10px;margin:6px 0 4px;font-size:.95rem}
+.opt.on{background:#f6ead0;box-shadow:inset 0 0 0 2.5px var(--gold);border-color:var(--gold-d)}
+.opt .ic{font-size:1.4rem}
+.opts.c5 .opt{font-size:.85rem;white-space:nowrap}
+.swatch{width:100%;min-height:40px;border:1.5px solid var(--line);border-radius:6px;cursor:pointer}
+.swatch.on{box-shadow:0 0 0 3px var(--bg),0 0 0 6px var(--gold)}
+
+/* lobby */
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 16px}
+.tile{border:1.5px solid var(--edge);border-radius:6px;box-shadow:0 2px 0 #e2d4b2;background:var(--card);padding:10px 6px;text-align:center;cursor:pointer}
+.tile .n{font-size:1.8rem;line-height:1.2}
+.tile .l{font-size:.9rem;font-weight:700}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{padding:8px 4px;text-align:center;border-bottom:1px solid #e6dcc6}
+.tbl th{font-size:.85rem;color:var(--sub)}
+.tbl td:first-child,.tbl th:first-child{text-align:left}
+.tbl tr.click{cursor:pointer}
+.mini{display:flex;align-items:center;gap:8px}
+.catrow{margin-bottom:12px}
+.catrow .row{justify-content:space-between}
+
+/* roster */
+.member{display:flex;align-items:center;gap:12px}
+.member .ava{padding:2px}
+
+/* switch */
+.sw{display:flex;justify-content:space-between;align-items:center;min-height:56px;gap:10px}
+.toggle{width:68px;height:38px;border:1.5px solid var(--line);border-radius:999px;background:#ddd5c4;position:relative;cursor:pointer;flex-shrink:0}
+.toggle:after{content:"";position:absolute;top:3px;left:3px;width:28px;height:28px;border-radius:50%;background:#fff;border:1.5px solid var(--line);transition:left .15s}
+.toggle.on{background:var(--green)}
+.toggle.on:after{left:31px}
+.setbtn{width:100%;text-align:left;min-height:56px;background:none;border:none;border-bottom:1px solid #ebe2cf;cursor:pointer;font-size:1rem}
+
+/* dialog / overlays */
+.overlay{position:fixed;inset:0;background:rgba(24,22,30,.55);z-index:50;display:flex;align-items:flex-end;justify-content:center}
+.dlg{width:calc(100% - 24px);max-width:456px;margin:0 12px 16px;display:flex;gap:12px;align-items:flex-start;animation:up .25s}
+.dlg .ava{border-color:#9db08a}
+.dlg-name{color:#4e6b45;font-size:1.05rem}
+.dlg-text{margin:4px 0 12px;font-size:1.05rem}
+.dlg-body{flex:1;min-width:0}
+.dlg{flex-wrap:wrap}
+.dlg-btns{width:100%;margin-top:2px}
+.dlg-btns .btn{white-space:nowrap}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+.fx{align-items:center}
+.fxbox{border:1.5px solid var(--gold);border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.25);padding:24px 18px;margin:16px;max-width:400px;width:100%;text-align:center;animation:pop .4s;position:relative;overflow:hidden}
+@keyframes pop{0%{transform:scale(.5);opacity:0}70%{transform:scale(1.05)}}
+.fxbig{font-size:2rem;color:var(--xp);margin:4px 0 4px}
+.fxbig.gold{color:#9a6a1c}
+.fxbox .ava{display:inline-block;margin:10px auto 6px}
+.spark{position:absolute;font-size:1.2rem;color:var(--gold);animation:tw 1.2s infinite}
+@keyframes tw{50%{opacity:.2;transform:scale(.6)}}
+.toast{position:fixed;top:78px;left:50%;transform:translateX(-50%);background:var(--xp);color:#fff;border:1.5px solid #4a3480;border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,.2);padding:10px 18px;z-index:60;font-weight:700;animation:up .25s;max-width:92vw;text-align:center}
+.empty{text-align:center;padding:20px}
+.empty .ava{display:inline-block}
+.xptbl td{padding:6px 0;border-bottom:1px solid #ebe2cf}
+.xptbl td:last-child{text-align:right;font-weight:700;color:var(--xp)}
+.road{display:flex;align-items:center;gap:12px;padding:10px;border-left:3px solid #ddd3bf;margin-left:6px;color:var(--sub)}
+.road .rl{min-width:52px}
+.road.done{border-left-color:var(--gold);color:var(--ink)}
+.road.here{background:#f8eed6;border-radius:0 6px 6px 0}
+/* 同步狀態 */
+.topbar h1{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.net{margin-left:auto;flex-shrink:0;font-size:.8rem;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);color:var(--gold-l);white-space:nowrap;cursor:pointer;font-weight:500}
+.net.off{background:#a5520f;color:#fff}
+.net.wait{background:#6a4fa8;color:#fff}
+.notice{margin:14px 16px;padding:12px 14px;border-radius:8px;background:#fbf3e0;border:1.5px dashed var(--gold);font-size:.95rem}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="dlg"></div>
+<div id="fx"></div>
+<div id="toast"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="config.js"></script>
+<script src="shared.js"></script>
+<script>
+/* ===================== 設定 ===================== */
+const DAY = 86400000;
+const STALE_DAYS = 14;
+const CLASSES = {
+  mage:     { n:'魔法師', i:'🔮', c:'#6a45b8', d:'#4a2f86' },
+  knight:   { n:'騎士',   i:'⚔️', c:'#8d99a8', d:'#5f6b7a' },
+  priest:   { n:'牧師',   i:'✚',  c:'#f4f4f4', d:'#c8c8c8' },
+  archer:   { n:'射手',   i:'🏹', c:'#3f8f4a', d:'#2a6633' },
+  assassin: { n:'刺客',   i:'🗡️', c:'#3a3d48', d:'#22242c' },
+};
+const HAIRS = { short:'短髮', long:'長髮', pony:'馬尾' };
+const HAIR_COLORS = ['#2a2420','#5e3a24','#c8a066','#b8b4ae','#8a3a2a','#e09ab0','#6aa4d8','#72b89a','#9478c8','#e08a3c'];
+const HAIR_NAMES  = ['黑','深棕','金','銀灰','紅','櫻花粉','天空藍','薄荷綠','薰衣草紫','橘'];
+const STATUS = {
+  doing:{ n:'進行中',   c:'var(--red)'   },
+  won:  { n:'已成交',   c:'var(--green)' },
+  quiet:{ n:'暫無回應', c:'var(--blue)'  },
+  no:   { n:'無意願',   c:'var(--gray)'  },
+};
+let CATS = TS.DEFAULT_CATS.slice();    // 實際類別以試算表「設定」工作表為準
+const STAGES = TS.STAGES;
+const OTHER_STAGE = TS.OTHER_STAGE, SIGN_STAGE = TS.SIGN_STAGE, DONE_STAGE = TS.DONE_STAGE;
+const stageLabel = o => o.stage===OTHER_STAGE && o.stageNote ? o.stageNote : STAGES[o.stage].n;
+const XP = TS.XP;
+
+/* ===================== 等級 ===================== */
+const need = lv => 50 + 25*(lv-1);
+function lvInfo(xp){ let lv=1, rest=xp; while(rest>=need(lv)){ rest-=need(lv); lv++; } return {lv, cur:rest, need:need(lv)}; }
+/* ===================== 轉職 ===================== */
+// Lv.10 一轉、Lv.25 二轉（二選一路線）、Lv.50 三轉（沿所選路線）
+const JOB_LV = [1,10,25,50];
+const FRAMES = ['#b8b0a0','#b87333','#aab4c0','#e0b030'];   // 頭像外框：見習／一轉／二轉／三轉
+const JOBS = {
+  knight:  { n:['見習騎士','騎士'],
+             A:{n2:'聖騎士',  n3:'天堂騎士', d:'守護之道：以神聖之光守護夥伴', cape:'#efe2b8', aura:'#fff0a0'},
+             B:{n2:'龍騎士',  n3:'龍王',     d:'征戰之道：駕馭巨龍的力量',     cape:'#a8303e', aura:'#e0524a'} },
+  mage:    { n:['見習法師','魔法師'],
+             A:{n2:'大魔導士',n3:'賢者',     d:'智慧之道：參透天地的奧秘',     cape:'#3f5fb0', aura:'#9fe2ff'},
+             B:{n2:'黑魔導士',n3:'魔導王',   d:'禁忌之道：掌控黑暗的魔力',     cape:'#3a2450', aura:'#a86ad8'} },
+  priest:  { n:['見習牧師','牧師'],
+             A:{n2:'主教',    n3:'聖者',     d:'祈禱之道：以聖光帶來祝福',     cape:'#efe2b8', aura:'#fff0a0'},
+             B:{n2:'武僧',    n3:'拳聖',     d:'修行之道：以肉身鍛鍊意志',     cape:'#c0602a', aura:'#ffa050'} },
+  archer:  { n:['見習射手','射手'],
+             A:{n2:'遊俠',    n3:'神射手',   d:'精準之道：百步穿楊，箭無虛發', cape:'#2d4f6e', aura:'#a8e88a'},
+             B:{n2:'獵人',    n3:'獸王',     d:'荒野之道：與野獸並肩作戰',     cape:'#6b4426', aura:'#e8b058'} },
+  assassin:{ n:['見習刺客','刺客'],
+             A:{n2:'暗影刺客',n3:'影武者',   d:'暗影之道：化身為無形的影子',   cape:'#2a2438', aura:'#9a7ae0'},
+             B:{n2:'忍者',    n3:'上忍',     d:'忍之道：迅捷如風，來去無蹤',   cape:'#1f2a3a', aura:'#58c8b8'} },
+};
+const jobStage = lv => lv>=50 ? 3 : lv>=25 ? 2 : lv>=10 ? 1 : 0;
+const jobName = (cls, st, path) => st<2 ? JOBS[cls].n[st] : JOBS[cls][path][st===2?'n2':'n3'];
+function jobInfo(u){
+  let st = jobStage(lvInfo(u.xp).lv), pending = false;
+  const path = u.char.path;
+  if(st>=2 && !path){ pending = true; st = 1; }          // 到了 Lv.25 但還沒選路線
+  return { stage:st, path, pending, name:jobName(u.char.cls, st, path) };
+}
+function titleOf(u){
+  if(u.role==='boss') return '👑 公會會長（老闆）';
+  if(!u.char) return '新進冒險者';
+  return `${CLASSES[u.char.cls].i} ${jobInfo(u).name}`;
+}
+
+/* ===================== 像素角色 ===================== */
+// 寫實像素角色：40×46 像素格，約 3 頭身、短脖子；美好年代風格的低飽和配色。
+// 繪製座標以 80 高設計：第 14 列以上整體下移一格（臉部第 14、15 列合併，讓臉變短），下巴以下（第 18 列之後）統一壓縮成 46 高。
+// 每個形狀畫上去時自動帶立體光影（光源在左上），最後加上同色系外框。
+// 小尺寸（頭像）自動裁成胸像特寫。
+// 每個職業 3 套服裝（開局自由選）：o=主色 a=重點色 t=飾邊色
+const OUTFITS = {
+  knight:  [ {n:'鐵衛鎧甲', o:'#9aa3ad',a:'#34507a',t:'#b8924a'},
+             {n:'皇家鎧甲', o:'#c9c4b6',a:'#7a2a32',t:'#c9a45c'},
+             {n:'黑曜鎧甲', o:'#55525e',a:'#4a3366',t:'#b0b6c2',helm:1} ],
+  mage:    [ {n:'星夜禮服', o:'#3b3a5e',a:'#6f5a8e',t:'#c9a45c',gem:'#8fd0e8'},
+             {n:'緋紅禮服', o:'#6e2a2e',a:'#40302a',t:'#d4a85a',gem:'#f0a050'},
+             {n:'霜白禮服', o:'#d8d4ca',a:'#5a6f86',t:'#8aa0b8',gem:'#a8e4f8'} ],
+  priest:  [ {n:'白羽聖袍', o:'#e8e0cf',a:'#34507a',t:'#b8924a'},
+             {n:'晨曦聖袍', o:'#e2cfa0',a:'#7a2a32',t:'#c9a45c'},
+             {n:'月光修袍', o:'#2e3550',a:'#c8ccd8',t:'#a9b0bc'} ],
+  archer:  [ {n:'森林遊俠', o:'#55704a',a:'#6e4e32',t:'#b8924a'},
+             {n:'秋楓獵人', o:'#8a5230',a:'#4e3626',t:'#c9a45c'},
+             {n:'雪原斥候', o:'#cfd2cc',a:'#5a5f66',t:'#7a9ab8'} ],
+  assassin:[ {n:'暗影裝束', o:'#2e2c36',a:'#6e2630',t:'#c8ccd4'},
+             {n:'夜鴉裝束', o:'#232a3c',a:'#2c6e6a',t:'#c8ccd4'},
+             {n:'赤霞裝束', o:'#4a1e28',a:'#b8924a',t:'#e8dcc4'} ],
+};
+function tone(hex, f){
+  const n=parseInt(hex.slice(1),16); let r=n>>16, g=n>>8&255, b=n&255;
+  const t=f<0?0:255, a=Math.abs(f);
+  r=Math.round(r+(t-r)*a); g=Math.round(g+(t-g)*a); b=Math.round(b+(t-b)*a);
+  return '#'+((1<<24)|(r<<16)|(g<<8)|b).toString(16).slice(1);
+}
+function sprite(ch, size, mode){
+  const W=40, H=46, K=(43-18)/(77-18), G=Array.from({length:H},()=>Array(W).fill(null));
+  const p=(x,y,c)=>{ x=Math.round(x); y=Math.round(y); if(y<=14) y+=1; else if(y>18) y=Math.round(18+(y-18)*K); if(x>=0&&x<W&&y>=0&&y<H) G[y][x]=c; };
+  // 光影：左亮右暗（metal 多一道高光）
+  const ramp=(c,t,n,metal)=>{
+    if(n<=2) return t<.5 ? c : tone(c,-.18);
+    if(metal) return t<.1?tone(c,.05) : t<.32?tone(c,.42) : t<.58?c : t<.82?tone(c,-.24) : tone(c,-.42);
+    return t<.16?tone(c,.15) : t<.6?c : t<.84?tone(c,-.15) : tone(c,-.3);
+  };
+  const span=(y,x1,x2,c,o={})=>{ x1=Math.round(x1); x2=Math.round(x2); const n=x2-x1+1;
+    for(let x=x1;x<=x2;x++){ const t=n<=1?.5:(x-x1)/(n-1); p(x,y,o.flat?c:ramp(c,t,n,o.metal)); } };
+  const taper=(y1,y2,a1,b1,a2,b2,c,o)=>{ for(let y=y1;y<=y2;y++){ const k=y2===y1?0:(y-y1)/(y2-y1); span(y,a1+(a2-a1)*k,b1+(b2-b1)*k,c,o); } };
+  const box=(x,y,w,h,c)=>{ for(let j=0;j<h;j++) for(let i=0;i<w;i++) p(x+i,y+j,c); };
+  const hl=(y,x1,x2,c)=>box(x1,y,x2-x1+1,1,c);
+  const vl=(x,y1,y2,c)=>box(x,y1,1,y2-y1+1,c);
+  const spark=(x,y,c)=>{ p(x,y,'#ffffff'); p(x-1,y,c); p(x+1,y,c); p(x,y-1,c); p(x,y+1,c); };
+
+  let cls, g, hair, hc, eye='#4a3426', fit;
+  if(ch==='elara'){ cls='elara'; g='f'; hair='wavy'; hc='#e0bd7e'; eye='#3f7a52'; fit={o:'#86a07c',a:'#d9a3a8',t:'#c9a45c'}; }
+  else if(ch==='boss'){ cls='boss'; g='m'; hair='short'; hc='#4a2e1e'; fit={o:'#7e2630',a:'#efe8da',t:'#c9a45c'}; }
+  else { cls=ch.cls; g=ch.g; hair=ch.hair; hc=HAIR_COLORS[ch.hc]; fit=OUTFITS[cls][ch.outfit||0]; }
+  const F = g==='f';
+  const O=fit.o, A=fit.a, T=fit.t, TD=tone(T,-.3), TL=tone(T,.4);
+  const skin='#e8bd98', skinS='#cf9c78', skinD='#b07e5e';
+  const hcD=tone(hc,-.32), hcL=tone(hc,.25);
+  const stage = ch.stage||0, job = (JOBS[cls]&&ch.path) ? JOBS[cls][ch.path] : null;
+  const capeC = job ? job.cape : tone(O,-.3), aura = job ? job.aura : '#f2e6a8', auraD = tone(aura,-.22);
+  const robe = ['priest','boss','elara'].includes(cls), coat = ['mage','assassin'].includes(cls);
+  const metal = cls==='knight';
+  const trouser = cls==='knight' ? tone(O,-.35) : cls==='archer' ? '#5e4c3a' : cls==='mage' ? '#2e2a2c' : tone(O,-.15);
+  const bootC = cls==='archer' ? tone(A,-.25) : cls==='knight' ? tone(O,-.3) : '#3a2a22';
+  const wood='#7a5236', lace='#f3ede2';
+
+  /* ================= 背景層 ================= */
+  if(stage>=3){                                         // 三轉：光翼（層疊羽毛）
+    const spiky = ch.path==='B', aL=tone(aura,.45);
+    const feathers=[[14,4,10],[20,1,13],[28,2,16],[36,4,18],[44,7,18],[52,10,16]];   // [起始列, 最外側 x, 長度]
+    feathers.forEach(([y0,xo,len],i)=>{
+      for(let j=0;j<len;j++){ const y=y0+j, k=j/len, xl=Math.round(xo+(13-xo)*k*k*(spiky?0.7:1));
+        const c = j<2 ? aL : (j%4===0 ? auraD : aura);
+        span(y,xl,13,c,{flat:1}); span(y,26,39-xl,c,{flat:1}); }
+      if(spiky){ p(xo-1,y0,aura); p(40-xo,y0,aura); }
+    });
+    for(let y=13;y<=44;y+=4){ p(12,y,aL); p(27,y,aL); }
+  }
+  if(cls==='boss') taper(20,76,12,27,7,32,tone(O,-.18));
+  else if(stage>=2 && cls!=='archer') taper(20,76,12,27,7,32,capeC);
+  if(cls==='archer'){ taper(17,21,15,24,14,25,capeC); taper(20,stage>=2?74:64,12,27,10,29,capeC); }
+  if(cls==='assassin') taper(21,34,24,30,27,34,A);
+  if(hair==='long') for(let y=10;y<=40;y++){ const w=(y%6<3)?0:1; span(y,14-w-(y>20?1:0),25+w+(y>20?1:0),hc); }
+  if(hair==='wavy') for(let y=10;y<=46;y++){ const w=Math.round(Math.sin(y/2.2)); span(y,13-w-(y>22?1:0),26+w+(y>22?1:0),hc); }
+  if(hair==='short' && F) taper(10,19,14,25,14,25,hc);
+  if(hair==='pony'){ box(24,9,2,2,T); taper(10,34,24,27,25,27,hc); }
+  if(cls==='archer'){                                   // 箭袋 + 長弓（在身後）
+    taper(12,33,25,28,25,28,A);
+    vl(26,7,12,'#d8d0c0'); vl(28,8,12,'#d8d0c0'); p(25,8,T); p(26,6,T); p(27,7,'#e8e0d0'); p(28,7,T); p(29,8,'#e8e0d0');
+  }
+  if(cls==='assassin') taper(5,22,15,24,13,26,O);       // 兜帽後半部
+
+  /* ================= 腿與靴子 ================= */
+  if(!robe){
+    const [l1,l2,r1,r2] = F ? [15,18,21,24] : [14,18,21,25];
+    taper(39,43,13,26,14,25,trouser);
+    taper(44,70,l1,l2,l1+1,18,trouser); taper(44,70,r1,r2,21,r2-1,trouser);
+    if(metal){ taper(56,71,l1,l2,l1+1,18,O,{metal:1}); taper(56,71,r1,r2,21,r2-1,O,{metal:1}); hl(57,l1+1,17,TL); hl(57,22,r2-1,TL); }
+    const top = cls==='archer' ? 54 : 60;
+    if(!metal){ taper(top,72,l1-1,l2,l1,18,bootC); taper(top,72,r1,r2+1,21,r2,bootC); hl(top,l1-1,l2,tone(bootC,.2)); hl(top,r1,r2+1,tone(bootC,.2)); }
+    taper(73,76,l1-1,18,l1-2,18,bootC,{metal}); taper(73,76,21,r2,21,r2+1,bootC,{metal});
+  }
+
+  /* ================= 下半身衣物 ================= */
+  if(cls==='knight'){ taper(38,46,13,26,12,27,O,{metal:1}); hl(41,13,26,tone(O,-.4)); hl(44,12,27,tone(O,-.4)); }
+  if(cls==='archer'){ taper(38,47,13,26,12,27,O); }
+  if(coat){ taper(38,70,13,18,10,17,O); taper(38,70,21,26,22,29,O);
+    if(cls==='mage') for(let y=38;y<=70;y++){ const k=(y-38)/32; p(18-k,y,T); p(21+k,y,T); }
+    hl(70,10,17,tone(O,-.3)); hl(70,22,29,tone(O,-.3)); }
+  if(cls==='priest'){ taper(38,76,13,26,9,30,O); hl(76,9,30,T); box(14,77,4,1,'#3a2a22'); box(22,77,4,1,'#3a2a22'); }
+  if(cls==='boss'){ taper(38,76,13,26,10,29,O); box(19,24,2,53,T); hl(76,10,29,T); box(14,77,4,1,'#3a2a22'); box(22,77,4,1,'#3a2a22'); }
+  if(cls==='elara'){ taper(36,76,14,25,7,32,O);
+    for(const y of [62,69]) for(let x=9;x<=30;x++) if((x+y)%3) p(x,y,tone(O,-.14));
+    for(let x=7;x<=32;x++) p(x,76,(x%2)?lace:tone(lace,-.1));
+    box(14,77,4,1,'#5a3a2a'); box(22,77,4,1,'#5a3a2a'); }
+
+  /* ================= 軀幹與手臂 ================= */
+  if(F){ taper(21,23,16,23,13,26,O,{metal}); taper(24,33,13,26,15,24,O,{metal}); taper(34,39,15,24,14,25,O,{metal}); }
+  else { taper(21,23,15,24,12,27,O,{metal}); taper(24,38,12,27,14,25,O,{metal}); }
+  if(cls==='elara'){ taper(21,23,11,13,9,13,O); taper(24,28,9,13,10,13,O); taper(21,23,26,28,26,30,O); taper(24,28,26,30,26,29,O); }   // 泡泡袖
+  const sl = cls==='elara' ? tone(O,.05) : O;
+  if(F){ taper(22,35,10,12,10,12,sl,{metal}); taper(36,46,10,12,10,12,sl,{metal}); taper(22,35,27,29,27,29,sl,{metal}); taper(36,46,27,29,27,29,sl,{metal}); }
+  else { taper(22,35,9,12,9,12,sl,{metal}); taper(36,46,9,12,10,12,sl,{metal}); taper(22,35,27,30,27,30,sl,{metal}); taper(36,46,27,30,27,29,sl,{metal}); }
+  const glove = metal ? tone(O,-.1) : cls==='archer' ? A : skin;
+  taper(47,50,10,12,10,12,glove,{metal}); taper(47,50,27,29,27,29,glove,{metal}); hl(50,10,12,tone(glove,-.2)); hl(50,27,29,tone(glove,-.2));
+
+  // 職業上身細節
+  if(cls==='knight'){
+    hl(38,13,26,'#4a3426'); box(19,38,2,1,T);
+    taper(26,58,16,23,15,24,A); hl(58,15,24,T); vl(19,31,42,T); vl(20,31,42,TD); hl(35,17,22,T);
+    hl(40,9,12,tone(O,-.35)); hl(40,27,30,tone(O,-.35));
+    taper(21,27,10,15,8,15,O,{metal:1}); taper(21,27,24,29,24,31,O,{metal:1}); hl(27,8,15,TD); hl(27,24,31,TD);
+  }
+  if(cls==='mage'){
+    taper(23,38,17,22,17,22,A); for(const y of [26,30,34]) p(19,y,T);
+    vl(16,23,37,tone(O,.25)); vl(23,23,37,tone(O,-.25));
+    hl(45,9,12,T); hl(45,27,30,T);
+  }
+  if(cls==='priest'){
+    taper(21,31,14,25,11,28,tone(O,.05)); hl(31,11,28,T);
+    box(16,32,2,42,A); box(22,32,2,42,A); for(const x of [16,22]){ box(x,66,2,4,T); hl(67,x-1,x+2,T); }
+    hl(40,13,26,T);
+  }
+  if(cls==='archer'){
+    taper(23,40,14,25,14,25,A); for(let y=25;y<=37;y+=3){ p(19,y,T); p(20,y+1,T); }
+    hl(39,13,26,'#3a2a20'); box(19,39,2,1,T); taper(40,46,9,12,10,12,A);
+  }
+  if(cls==='assassin'){
+    for(let i=0;i<=14;i++){ p(14+i*0.75,24+i,'#4a3426'); p(25-i*0.75,24+i,'#4a3426'); }
+    hl(38,13,26,'#3a2a22');
+  }
+  if(cls==='elara'){
+    hl(34,15,24,A); hl(35,15,24,tone(A,-.15)); p(14,36,A); p(14,37,A); p(13,38,tone(A,-.15)); p(13,39,tone(A,-.2));
+    hl(44,10,12,lace); hl(45,10,12,tone(lace,-.08)); hl(44,27,29,lace); hl(45,27,29,tone(lace,-.08));
+  }
+  if(cls==='boss'){ taper(19,30,14,25,9,30,A);
+    for(const [x,y] of [[12,26],[16,28],[21,27],[25,29],[28,26],[19,24],[14,23],[24,23]]) p(x,y,'#2a2622'); }
+  if(stage>=2 && cls!=='boss' && cls!=='archer'){ taper(20,24,14,25,10,29,capeC); box(19,22,2,2,T); }
+
+  /* ================= 頭部 ================= */
+  for(let y=18;y<=21;y++) span(y,18,21,skin); hl(18,18,21,skinD);
+  if(cls==='knight') { span(20,16,23,O,{metal:1}); span(21,15,24,O,{metal:1}); }
+  // 圓潤臉型：11 列高、8 格寬，下巴圓弧收尾
+  const head = F ? [[7,17,22],[8,16,23],[9,16,23],[10,16,23],[11,16,23],[12,16,23],[13,16,23],[14,16,23],[15,16,23],[16,17,22],[17,18,21]]
+                 : [[7,17,22],[8,16,23],[9,16,23],[10,16,23],[11,16,23],[12,16,23],[13,16,23],[14,16,23],[15,16,23],[16,16,23],[17,17,22]];
+  for(const [y,a,b] of head) span(y,a,b,skin);
+  vl(15,12,14,skin); vl(24,12,14,skinS); p(15,13,skinS);
+  // 五官
+  if(F){ const brow=tone(hc,-.15); p(17,11,brow); p(18,11,tone(brow,.1)); p(21,11,tone(brow,.1)); p(22,11,brow);
+    p(17,12,'#7a5848'); p(18,12,'#4a3228'); p(21,12,'#4a3228'); p(22,12,'#7a5848'); p(16,12,'#3a2622'); p(23,12,'#3a2622');
+    p(17,13,'#f4eee6'); p(18,13,eye); p(21,13,eye); p(22,13,'#f4eee6'); p(18,14,tone(eye,-.25)); p(21,14,tone(eye,-.25));
+    p(20,15,skinS); hl(16,19,20,'#b8586a'); p(17,15,'#e6a08c'); p(22,15,'#d99080'); }
+  else { hl(11,17,18,hcD); hl(11,21,22,hcD);
+    p(17,12,'#6a4c3c'); p(18,12,'#3a2a22'); p(21,12,'#3a2a22'); p(22,12,'#6a4c3c');
+    p(17,13,'#f4eee6'); p(18,13,eye); p(21,13,eye); p(22,13,'#f4eee6');
+    p(20,14,skinS); p(20,15,skinD); hl(16,19,20,'#9a6050'); }
+
+  /* ================= 頭髮（前） ================= */
+  // 頭髮比頭大一圈：頭頂往上長、兩側往外長，避免貼著頭皮像蛋頭
+  if(!F){ p(17,3,hc); p(19,3,hc); p(20,3,hcL); p(22,3,hc); }
+  span(4,16,23,hc); for(let y=5;y<=9;y++) span(y,14,25,hc);
+  // 髮絲紋理
+  p(17,5,hcL); p(18,4,hcL); p(19,5,hcL); p(16,6,hcL); p(20,6,hcL); p(15,7,hcL); p(18,7,hcL);
+  p(21,7,hcD); p(22,8,hcD); p(23,6,hcD); p(18,8,hcD); p(15,9,hcD); p(24,9,hcD); p(20,9,hcD);
+  if(hair==='short' && !F){
+    vl(17,5,9,hcD);                                            // 左側分線
+    p(14,10,hc); p(15,10,hc); span(10,19,25,hc); p(23,11,hcD); p(24,11,hc); p(25,11,hcD);
+    vl(14,10,12,tone(hc,-.2)); vl(25,10,12,tone(hc,-.4)); p(15,11,hcD);
+    p(21,10,hcD); p(23,10,hcD);
+  } else {
+    span(10,14,16,hc); span(10,19,25,hc); p(18,9,hcD); p(17,10,hcD);   // 側分瀏海
+    p(14,11,hc); p(15,11,hc); p(24,11,hc); p(25,11,hcD);
+  }
+  if(hair==='short' && F){ for(let y=11;y<=17;y++){ span(y,14,16,hc); span(y,23,25,hcD); } p(16,17,hcD); p(23,17,hcD); }
+  if(hair==='long'){ for(let y=11;y<=20;y++){ span(y,14,15,hc); span(y,24,25,hcD); } vl(13,13,22,hc); vl(26,13,22,hcD); }
+  if(hair==='pony'){ vl(14,10,13,hc); vl(25,10,13,hcD); }
+  if(hair==='wavy'){
+    for(let y=11;y<=36;y++){ const w=Math.round(Math.sin(y/2.2)); span(y,14+w-(y>20?1:0),15+w,hc); span(y,24-w,25-w+(y>20?1:0),hcD); }
+    hl(10,19,22,skin); p(22,10,hc); p(19,9,hcD); p(18,10,hcD); hl(9,15,18,hcL);
+    p(15,16,hcL); p(14,24,hcL); p(13,30,hcL); p(25,20,hcL); p(26,28,hcL);
+  }
+
+  /* ================= 頭飾、臉部配件 ================= */
+  if(cls==='knight' && fit.helm){
+    taper(1,5,17,22,13,26,O,{metal:1}); for(let y=6;y<=10;y++) span(y,13,26,O,{metal:1});
+    taper(11,17,13,16,15,16,O,{metal:1}); taper(11,17,23,26,23,24,O,{metal:1}); hl(10,14,25,T);
+    vl(19,0,5,T); vl(20,0,5,TD);
+  }
+  if(cls==='priest'){ hl(9,16,23,T); p(19,9,'#8fd0e8'); p(20,9,'#6fb0c8'); }
+  if(cls==='assassin'){
+    span(1,18,21,O); span(2,16,23,O); span(3,15,24,O); for(let y=4;y<=10;y++) span(y,13,26,O);
+    taper(11,19,13,16,14,16,O); taper(11,19,23,26,23,25,O);
+    p(17,10,hc); p(18,10,hcD); p(21,10,hc);
+    span(15,16,23,A); span(16,16,23,A); span(17,17,22,A); vl(20,15,16,tone(A,-.2));
+  }
+  if(cls==='elara'){
+    p(15,14,skinS); hl(13,14,15,skin); hl(12,13,15,skin); hl(11,12,14,skin); p(12,10,skin); p(11,10,skinS);
+    p(24,14,skinD); hl(13,24,25,skinS); hl(12,24,26,skinS); hl(11,25,27,skinS); p(27,10,skinS); p(28,10,skinD);
+    p(14,12,tone(skin,.12)); p(13,11,tone(skin,.12));
+    p(23,8,'#f6f0f4'); p(24,8,'#ffffff'); p(23,9,'#e8b8c8'); p(24,9,'#f6f0f4'); p(22,9,'#6e9a62'); p(25,9,'#6e9a62');
+    span(20,16,23,lace); span(21,16,23,lace); for(let x=16;x<=23;x++) p(x,22,(x%2)?lace:tone(lace,-.12));
+    box(19,23,2,2,T); p(19,23,'#7fb8a0');
+  }
+  if(cls==='mage'){ taper(18,22,15,17,14,17,tone(O,-.1)); taper(18,22,22,24,22,25,tone(O,-.1)); box(19,21,2,3,lace); p(19,24,T); }
+  if(cls==='boss'){
+    // 年輕國王：深棕短髮、無鬍子；王冠蓋住頭頂髮束
+    span(3,16,23,T,{metal:1}); for(let y=4;y<=7;y++) span(y,16,23,T,{metal:1}); vl(16,2,3,T); box(19,1,2,3,T); vl(23,2,3,TD);
+    p(18,5,'#b8343a'); p(21,5,'#3a64a6'); hl(7,16,23,TD);
+  }
+
+  /* ================= 武器（前景） ================= */
+  if(cls==='knight'){
+    taper(28,31,4,10,2,12,A); for(let y=32;y<=46;y++) span(y,2,12,A); taper(47,53,2,12,6,8,A);
+    vl(7,30,50,T); hl(36,3,11,T); box(6,38,3,3,TL);
+    vl(28,7,44,'#eef1f4'); vl(29,7,44,'#9aa3ad'); p(28,6,'#eef1f4');
+    hl(45,25,32,T); hl(46,25,25,TD); hl(46,32,32,TD); box(28,46,2,7,'#4a3022'); box(28,53,2,2,T);
+    taper(47,50,27,29,27,29,glove,{metal:1});
+    if(stage>=1){ vl(28,9,42,'#ffffff'); spark(28,3,'#f2e6a8'); p(26,20,'#f2e6a8'); p(31,30,'#f2e6a8'); }
+  }
+  if(cls==='mage'){
+    const gem=fit.gem;
+    vl(29,9,76,wood); vl(30,9,76,tone(wood,-.3));
+    const big = stage>=1 ? 1 : 0;
+    span(1-big,29,30,gem,{flat:1}); span(2,28-big,31+big,gem); span(3,27-big,32+big,gem); span(4,27-big,32+big,gem); span(5,28-big,31+big,gem); span(6+big,29,30,gem,{flat:1});
+    p(28,3,'#ffffff'); p(27,7+big,T); p(32,7+big,T); p(28,8+big,T); p(31,8+big,T);
+    taper(47,50,27,29,27,29,skin);
+    if(stage>=1){ spark(25,2,gem); spark(35,6,gem); p(33,12,gem); }
+  }
+  if(cls==='priest'){
+    vl(29,8,76,T); vl(30,8,76,TD);
+    hl(1,27,32,T); vl(26,2,6,T); vl(33,2,6,TD); hl(7,27,32,TD); box(29,3,2,3,'#fff4c8'); p(29,3,'#ffffff');
+    taper(47,50,27,29,27,29,skin);
+    if(stage>=1){ p(24,3,T); p(25,2,T); p(35,3,TD); p(34,2,TD); spark(29,-1,'#fff4c8'); spark(36,10,'#fff4c8'); }
+  }
+  if(cls==='assassin'){
+    vl(9,37,46,T); vl(30,37,46,T); p(9,36,'#ffffff'); p(30,36,'#ffffff'); box(9,51,1,2,'#3a2a22'); box(30,51,1,2,'#3a2a22');
+    if(stage>=1){ vl(9,33,36,T); vl(30,33,36,T); p(8,35,A); p(31,35,A); }
+  }
+  if(cls==='archer'){
+    vl(5,21,75,'#e8e0d0');
+    for(let y=20;y<=76;y++){ const x=10-Math.round(5*Math.pow((y-48)/28,2)); p(x,y,wood); p(x+1,y,tone(wood,-.28)); }
+    box(9,46,3,4,A); taper(47,50,10,12,10,12,A);
+    if(stage>=1){ box(4,19,2,2,T); box(4,75,2,2,T); spark(5,15,T); }
+  }
+  if(cls==='boss'){ vl(29,14,64,T); vl(30,14,64,TD); box(28,10,4,4,'#b8343a'); p(28,10,'#e8686a'); box(29,8,2,2,T); taper(47,50,27,29,27,29,skin); }
+  if(stage>=3){ for(const [x,y] of [[3,6],[36,9],[2,64],[37,60],[5,30],[34,36]]) spark(x,y,tone(aura,.3)); }
+
+  /* ================= 同色系外框 ================= */
+  const out=G.map(a=>a.slice());
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){
+    if(G[y][x]) continue;
+    const n = (G[y+1]&&G[y+1][x]) || G[y][x-1] || G[y][x+1] || (G[y-1]&&G[y-1][x]);
+    if(n) out[y][x]=tone(n,-.6);
+  }
+  const R=[];
+  for(let y=0;y<H;y++){ let x=0; while(x<W){ const c=out[y][x]; if(!c){x++;continue;} let e=x; while(e+1<W&&out[y][e+1]===c) e++;
+    R.push(`<rect x="${x}" y="${y}" width="${e-x+1}" height="1" fill="${c}"/>`); x=e+1; } }
+  const bust = mode ? mode==='bust' : size<=72;
+  const vb = bust ? '8 3 24 26' : '0 0 40 46';
+  const hgt = bust ? Math.round(size*26/24) : Math.round(size*46/40);
+  return `<svg class="spr" viewBox="${vb}" width="${size}" height="${hgt}" shape-rendering="crispEdges">${R.join('')}</svg>`;
+}
+function avatar(u, size){
+  const ji = u.char ? jobInfo(u) : null;
+  const spr = u.role==='boss' ? sprite('boss',size) : u.char ? sprite({...u.char, stage:ji.stage},size) : `<div style="width:${size}px;height:${Math.round(size*26/24)}px;display:flex;align-items:center;justify-content:center;font-size:${size/2}px">❔</div>`;
+  const frame = u.role==='boss' ? '#e0b030' : FRAMES[ji ? ji.stage : 0];
+  return `<div class="ava" style="border-color:${frame}">${spr}</div>`;
+}
+
+/* ===================== 資料、離線佇列與同步 ===================== */
+// 資料先存在手機（localStorage），所有修改都先套用在手機上並放進待同步佇列 Q，
+// 有網路時送到 Google Apps Script，再用伺服器回傳的最新資料取代本機資料。
+const STORE = 'tongsin-app-v1';
+let S = { users:[], cases:[], xplog:[], categories:TS.DEFAULT_CATS.slice(), prefs:{big:false}, session:null };
+let Q = [], QUID = null, TOKEN = null, ROSTER = [];
+let NET = navigator.onLine ? 'idle' : 'offline', syncing = false;
+function persist(){ try{ localStorage.setItem(STORE, JSON.stringify({ S, Q, QUID, TOKEN, ROSTER })); }catch(e){} }
+const save = persist;
+(function restore(){
+  try{ const d = JSON.parse(localStorage.getItem(STORE)||'null');
+    if(d){ S = Object.assign(S, d.S||{}); Q = d.Q||[]; QUID = d.QUID||null; TOKEN = d.TOKEN||null; ROSTER = d.ROSTER||[]; } }catch(e){}
+  if(S.categories && S.categories.length) CATS = S.categories;
+})();
+
+function setServerState(st){
+  S = Object.assign({ prefs:S.prefs, session:S.session }, { users:st.users||[], cases:st.cases||[], xplog:st.xplog||[],
+        categories:(st.categories&&st.categories.length) ? st.categories : TS.DEFAULT_CATS.slice(), members:st.members||[] });
+  CATS = S.categories;
+  const u = me(); if(u) Q.forEach(op=>TS.applyOp(S, op, u));           // 還沒同步的修改，重新套用在最新資料上
+}
+function dispatch(...ops){
+  const u = me(); let failed = null;
+  ops.forEach(op=>{
+    if(!op || failed) return;
+    op.id = op.id || TS.uid(); op.at = Date.now();
+    const err = TS.applyOp(S, op, u);
+    if(err){ failed = err; return; }
+    Q.push(op); QUID = u.id;
+  });
+  persist(); updateNet(); setTimeout(sync, 30);
+  if(failed) toast('⚠ '+esc(failed));
+  return !failed;
+}
+async function api(body){
+  if(!API_URL) throw new Error('NO_API');
+  const ctl = typeof AbortController!=='undefined' ? new AbortController() : null;
+  const timer = setTimeout(()=>ctl && ctl.abort(), 25000);
+  try{ const r = await fetch(API_URL, { method:'POST', body:JSON.stringify(body), signal: ctl && ctl.signal }); return await r.json(); }
+  finally{ clearTimeout(timer); }
+}
+async function sync(){
+  if(syncing || !TOKEN) return;
+  if(!navigator.onLine){ NET='offline'; updateNet(); return; }
+  syncing = true; NET = 'syncing'; updateNet();
+  try{
+    const batch = Q.slice(0, 50);
+    const r = await api({ action:'sync', token:TOKEN, ops:batch });
+    if(!r.ok){ if(r.error==='AUTH'){ syncing=false; forceLogout(r.message); return; } throw new Error(r.message||r.error); }
+    const done = new Set(r.results.map(x=>x.id));
+    r.results.filter(x=>!x.ok).forEach(x=>toast('⚠ 有一筆資料沒有寫入雲端：'+esc(x.error||'')));
+    Q = Q.filter(op=>!done.has(op.id));
+    setServerState(r.state);
+    if(!me()){ syncing=false; forceLogout('你的帳號已停用，請洽會長'); return; }
+    NET = 'idle'; persist(); refreshView();
+    if(Q.length) setTimeout(sync, 200);
+  }catch(e){ NET = navigator.onLine ? 'error' : 'offline'; }
+  finally{ syncing = false; updateNet(); }
+}
+// 正在填表單或看動畫時不重畫，避免打到一半的字被清掉
+function refreshView(){
+  if(!S.session) return;
+  if(['home','lobby','roster','settings','job'].includes(ui.page) && !document.querySelector('#fx .fxbox') && !dlg) render();
+}
+function netLabel(){
+  if(!navigator.onLine || NET==='offline') return ['off', Q.length ? `📴 離線・${Q.length} 筆待同步` : '📴 離線中'];
+  if(NET==='syncing') return ['wait','🔄 同步中…'];
+  if(Q.length) return ['wait', `⏳ ${Q.length} 筆待同步`];
+  if(NET==='error') return ['off','⚠ 同步失敗，稍後重試'];
+  return ['','☁️ 已同步'];
+}
+function netBadge(){ const [c,t] = netLabel(); return `<span class="net ${c}" id="net" onclick="sync()" title="點一下立即同步">${t}</span>`; }
+function updateNet(){ const el = document.getElementById('net'); if(!el) return; const [c,t] = netLabel(); el.className = 'net '+c; el.textContent = t; }
+function forceLogout(msg){ TOKEN = null; S.session = null; persist(); resetUI(); render(); loadRoster(); if(msg) toast(esc(msg)); }
+async function loadRoster(){
+  if(!navigator.onLine || !API_URL) return;
+  try{ const r = await api({ action:'roster' }); if(r.ok){ ROSTER = r.users; persist(); if(!me() && !ui.pick) render(); } }catch(e){}
+}
+window.addEventListener('online', ()=>{ NET='idle'; updateNet(); TOKEN ? sync() : loadRoster(); });
+window.addEventListener('offline', ()=>{ NET='offline'; updateNet(); });
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden) sync(); });
+setInterval(()=>{ if(!document.hidden) sync(); }, 60000);
+
+/* ===================== 小工具 ===================== */
+const DIVIDER='<svg class="divider" width="190" height="14" viewBox="0 0 190 14" aria-hidden="true"><path d="M4 7H78M112 7H186" stroke="#b8924a" stroke-width="1.2"/><circle cx="84" cy="7" r="2" fill="#b8924a"/><circle cx="106" cy="7" r="2" fill="#b8924a"/><path d="M95 1L101 7L95 13L89 7Z" fill="none" stroke="#b8924a" stroke-width="1.4"/><path d="M95 4.5L97.5 7L95 9.5L92.5 7Z" fill="#b8924a"/></svg>';
+const $ = s => document.querySelector(s);
+const esc = s => String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const userById = id => S.users.find(u=>u.id===id);
+const caseById = id => S.cases.find(c=>c.id===id);
+const me = () => S.session && userById(S.session.uid);
+const daysSince = t => Math.floor((Date.now()-t)/DAY);
+const isStale = c => c.st==='doing' && daysSince(c.updated) > STALE_DAYS;
+function agoText(t){ const d=daysSince(t); return d<=0?'今天':d===1?'昨天':`${d} 天前`; }
+function fmt(t){ const d=new Date(t); const p=n=>String(n).padStart(2,'0'); return `${d.getMonth()+1}/${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+const badge = st => `<span class="badge s-${st}"><span class="dot" style="background:#fff"></span>${STATUS[st].n}</span>`;
+function displayName(u){ return u.role==='boss' ? '👑 公會會長（老闆）' : `${titleOf(u)}　${esc(u.name)}`; }
+function toast(html){ const el=document.createElement('div'); el.className='toast'; el.innerHTML=html; $('#toast').appendChild(el); setTimeout(()=>el.remove(), 2600); }
+function applyPrefs(){ document.documentElement.classList.toggle('big', !!S.prefs.big); }
+
+/* ===================== 畫面狀態 ===================== */
+const freshUI = () => ({ page:null, caseId:null, pick:null, pin:'', pinErr:'', draft:null, st:null, from:null,
+           lf:{owner:'all',cat:'all',st:'all',q:''}, hf:'all', mon:0 });
+let ui = freshUI();
+function resetUI(){ ui=freshUI(); dlg=null; drawDlg(); $('#fx').innerHTML=''; }
+
+function go(page, extra={}){ Object.assign(ui, {page}, extra); render(); window.scrollTo(0,0); }
+function homePage(){ return me().role==='boss' ? 'lobby' : 'home'; }
+
+function render(){
+  applyPrefs();
+  const app=$('#app');
+  if(!me()){ app.innerHTML = loginView(); return; }
+  const v = { home:homeView, lobby:lobbyView, roster:rosterView, settings:settingsView,
+              add:addView, case:caseView, create:createView, job:jobView, edit:editView, members:membersView, member:memberView, pin:pinView }[ui.page] || homeView;
+  app.innerHTML = v();
+  if(ui.page==='case') initCaseForm();
+  if(ui.page==='lobby') drawLobbyList();
+}
+
+function navBar(){
+  const u=me(), p=ui.page;
+  const first = u.role==='boss' ? ['lobby','👑','公會大廳'] : ['home','📜','我的案件'];
+  const items=[first,['roster','🏰','公會名冊'],['settings','⚙️','設定']];
+  return `<nav class="nav">${items.map(([k,ic,l])=>`<button class="${p===k?'on':''}" onclick="go('${k}')"><span class="ic">${ic}</span>${l}</button>`).join('')}</nav>`;
+}
+
+/* ===================== 登入 ===================== */
+function loginView(){
+  const hero = `<div class="hero">${`<div class="ava" style="border-color:#c9a45c">${sprite('elara',72)}</div>`}
+    <h1 class="px">同欣冒險者公會</h1>${DIVIDER}<div class="px en">TONGSIN GUILD</div></div>`;
+  if(!ui.pick){
+    if(!API_URL) return `${hero}<div class="notice">⚙️ 尚未設定伺服器網址。請依照 README 的步驟部署 Google Apps Script，並把網址填進 <b>config.js</b>。</div>`;
+    const sales=ROSTER.filter(u=>u.role==='sales'), boss=ROSTER.find(u=>u.role==='boss');
+    if(!ROSTER.length) return `${hero}<div class="notice">${navigator.onLine ? '正在載入名單…' : '📴 第一次登入需要網路，請連上網路後再打開。'}</div>`;
+    return `${hero}<div class="card orn" style="padding:20px 18px"><h2>請選擇你的名字</h2><div class="namegrid">
+      ${sales.map(u=>`<button class="btn" onclick="pickUser('${u.id}')">${esc(u.name)}</button>`).join('')}
+      ${boss?`<button class="btn boss" onclick="pickUser('${boss.id}')">👑 ${esc(boss.name)}（公會會長）</button>`:''}</div></div>`;
+  }
+  const u=ROSTER.find(x=>x.id===ui.pick)||{name:''};
+  const keys=[1,2,3,4,5,6,7,8,9,'back',0,'del'];
+  return `${hero}<div class="card" style="text-align:center">
+    <h2>${esc(u.name)}，請輸入 4 位數密碼</h2>
+    <div class="pins">${[0,1,2,3].map(i=>`<i class="${i<ui.pin.length?'f':''}"></i>`).join('')}</div>
+    <div class="err">${ui.pinErr}</div>
+    <div class="keypad">${keys.map(k=> k==='back' ? `<button class="btn" style="font-size:1rem" onclick="ui.pick=null;ui.pin='';ui.pinErr='';render()">換人</button>`
+      : k==='del' ? `<button class="btn" onclick="pinKey('del')">⌫</button>`
+      : `<button class="btn" onclick="pinKey(${k})">${k}</button>`).join('')}</div></div>`;
+}
+function pickUser(id){ ui.pick=id; ui.pin=''; ui.pinErr=''; render(); }
+function pinKey(k){
+  if(k==='del'){ ui.pin=ui.pin.slice(0,-1); render(); return; }
+  if(ui.pin.length>=4) return;
+  ui.pin+=k; ui.pinErr='';
+  if(ui.pin.length===4){ doLogin(); return; }
+  render();
+}
+async function doLogin(){
+  const uid=ui.pick, pin=ui.pin;
+  if(!navigator.onLine){ ui.pin=''; ui.pinErr='登入需要網路，請連上網路後再試'; render(); return; }
+  ui.pinErr='登入中…'; render();
+  try{
+    const r = await api({ action:'login', uid, pin });
+    if(!r.ok){ ui.pin=''; ui.pinErr=esc(r.message||'登入失敗'); render(); return; }
+    TOKEN = r.token; if(QUID!==r.uid) Q = [];                          // 換人登入時，不沿用上一個人沒同步的資料
+    S.session = { uid:r.uid }; setServerState(r.state); NET='idle'; persist();
+    ui.pick=null; ui.pin=''; ui.pinErr=''; afterLogin(); if(Q.length) sync();
+  }catch(e){ ui.pin=''; ui.pinErr='連線失敗，請確認網路後再試'; render(); }
+}
+async function logout(){
+  if(Q.length && navigator.onLine) await sync();
+  if(Q.length && !confirm(`還有 ${Q.length} 筆資料沒有同步到雲端，現在登出會遺失。\n建議先連上網路同步完再登出。確定要登出嗎？`)) return;
+  TOKEN=null; Q=[]; S={ users:[], cases:[], xplog:[], categories:CATS, prefs:S.prefs, session:null }; persist(); resetUI(); render(); loadRoster();
+}
+
+function afterLogin(){
+  const u=me();
+  if(u.role==='boss'){
+    go('lobby');
+    if(!u.tutDone) elara([
+      '歡迎回來，會長！我是公會的精靈嚮導<b>艾拉</b>。這裡是<b>公會大廳</b>，可以看到每位業務在跑哪些客戶。',
+      '上方的數字方塊可以直接點，快速篩選案件。<span class="warn">⚠ 逾期</span> 是超過 14 天沒有更新的進行中案件。',
+      '點進任何案件可以看完整的更新紀錄。下方的「<b>會長操作</b>」可以<b>留言</b>給業務、把案件<b>轉派</b>給別人，業務誤標成交時也可以<b>撤銷成交</b>。',
+      '「<b>每月戰績</b>」可以看本月和上個月的新增、成交；需要報表時，按「<b>📥 匯出 Excel 報表</b>」就能下載。',
+    ], ()=>dispatch({ type:'profile', set:{ tutDone:true } }), {tut:true});
+    return;
+  }
+  if(!u.char){
+    go('home');
+    elara([
+      '歡迎來到<b>同欣冒險者公會</b>！我是精靈嚮導<b>艾拉 Elara</b>，接下來由我帶你熟悉環境～',
+      '首先，來建立你的冒險者角色吧！',
+    ], ()=>startCreate(), {tut:true, onSkip:()=>startCreate()});
+    return;
+  }
+  go('home');
+  const n=S.cases.filter(c=>c.owner===u.id && isStale(c)).length, m=S.cases.filter(c=>c.owner===u.id && c.bossUnread).length;
+  const msg=[]; if(m) msg.push(`會長在 <b>${m} 個案件</b>留言給你了，案件上有 👑 標記喔！`);
+  if(n) msg.push(`有 <b class="warn">${n} 個案件</b>超過 14 天沒有更新了，記得回去看看喔！`);
+  if(msg.length){ msg[0]='歡迎回來！'+msg[0]; elara(msg); }
+}
+
+/* ===================== 艾拉對話 ===================== */
+let dlg=null;
+function elara(lines, onDone, opts={}){ dlg={lines,i:0,onDone,...opts}; drawDlg(); }
+function drawDlg(){
+  const box=$('#dlg');
+  if(!dlg){ box.innerHTML=''; return; }
+  const last = dlg.i===dlg.lines.length-1;
+  box.innerHTML = `<div class="overlay"><div class="dlg card">
+    <div class="ava">${sprite('elara',108,'bust')}</div>
+    <div class="dlg-body"><div class="px dlg-name">艾拉 Elara</div>
+      <div class="dlg-text">${dlg.lines[dlg.i]}</div></div>
+      <div class="row dlg-btns">${dlg.tut && !last ? `<button class="btn ghost" onclick="dlgSkip()">跳過教學</button>`:''}
+        <button class="btn" onclick="dlgNext()">${last?'好的！':'下一步 ▶'}</button></div></div></div>`;
+}
+function dlgNext(){ if(dlg.i < dlg.lines.length-1){ dlg.i++; drawDlg(); return; } const f=dlg.onDone; dlg=null; drawDlg(); f&&f(); }
+function dlgSkip(){
+  const d=dlg; dlg=null; drawDlg();
+  const u=me(); ui.tutAdd=false; if(u && !u.tutDone) dispatch({ type:'profile', set:{ tutDone:true } });
+  if(d.onSkip) d.onSkip(); else render();
+}
+
+/* ===================== 建立角色 ===================== */
+function startCreate(){ const u=me(); ui.draft = u.char ? {...u.char} : {cls:'knight',g:'m',hair:'short',hc:0,outfit:0}; go('create'); }
+function createView(){
+  const u=me(), d=ui.draft, editing=!!u.char;
+  const fit=OUTFITS[d.cls][d.outfit||0], ji=jobInfo({xp:u.xp,char:d}), dv={...d,stage:ji.stage};
+  return `<div class="topbar">${editing?`<button class="back" onclick="go('settings')">← 返回</button>`:''}<h1 class="px">${editing?'修改角色外觀':'建立你的角色'}</h1>${netBadge()}</div>
+  <div class="card">
+    <div class="preview">${sprite(dv,128)}</div>
+    <div style="text-align:center;margin-top:6px;font-weight:700">${fit.n}</div>
+    <div style="text-align:center;margin-top:10px">
+      <div class="px" style="color:var(--sub)">${CLASSES[d.cls].i} ${ji.name}</div>
+      <div class="pname">${esc(u.name)}</div>
+      <div class="muted" style="font-size:.9rem">名字由公司設定，讓會長一眼認出你</div>
+    </div>
+  </div>
+  <div class="card">
+    <h2>職業</h2>
+    <div class="opts c5">${Object.entries(CLASSES).map(([k,v])=>`<button class="opt ${d.cls===k?'on':''}" onclick="ui.draft.cls='${k}';render()"><span class="ic">${v.i}</span>${v.n}</button>`).join('')}</div>
+    <p class="muted" style="font-size:.9rem;margin:8px 0 0">職業只影響外觀和稱號，不影響經驗值。</p>
+    <h2 style="margin-top:16px">服裝</h2>
+    <div class="opts c3">${OUTFITS[d.cls].map((f,i)=>{
+      return `<button class="opt ${(d.outfit||0)===i?'on':''}" onclick="ui.draft.outfit=${i};render()" style="padding:8px 2px">
+        ${sprite({...dv,outfit:i},40)}<b style="font-size:.9rem">${f.n}</b></button>`; }).join('')}</div>
+    
+    <h2 style="margin-top:16px">性別</h2>
+    <div class="opts c2">${[['m','男生'],['f','女生']].map(([k,l])=>`<button class="opt ${d.g===k?'on':''}" onclick="ui.draft.g='${k}';render()">${l}</button>`).join('')}</div>
+    <h2 style="margin-top:16px">髮型</h2>
+    <div class="opts c3">${Object.entries(HAIRS).map(([k,l])=>`<button class="opt ${d.hair===k?'on':''}" onclick="ui.draft.hair='${k}';render()">${l}</button>`).join('')}</div>
+    <h2 style="margin-top:16px">髮色</h2>
+    <div class="opts c5">${HAIR_COLORS.map((c,i)=>`<button class="swatch ${d.hc===i?'on':''}" style="background:${c}" title="${HAIR_NAMES[i]}" aria-label="髮色：${HAIR_NAMES[i]}" onclick="ui.draft.hc=${i};render()"></button>`).join('')}</div>
+  </div>
+  <div style="margin:16px">${`<button class="btn block" onclick="finishCreate()">${editing?'儲存外觀':'完成，出發冒險！⚔️'}</button>`}</div>`;
+}
+function finishCreate(){
+  const u=me(), first=!u.char;
+  dispatch({ type:'profile', set:{ char:{...ui.draft} } });
+  if(!first){ toast('外觀已更新'); go('settings'); return; }
+  go('home');
+  if(u.tutDone) return;
+  elara([
+    '好帥氣！上面這張是你的<b>角色卡</b>。成交越多客戶，經驗值越高，等級就會越高。到了 <b>Lv.10、25、50</b> 還能<b>轉職</b>，外觀也會變得更帥氣喔！',
+    `每個客戶案件前面都有顏色：<br>${badge('doing')} ${badge('won')}<br>${badge('quiet')} ${badge('no')}<br>進行中的案件超過 14 天沒更新，會出現 <span class="warn">⚠ 提醒</span>。`,
+    '現在試試看，按下方發亮的「<b>＋ 新增客戶</b>」，接下你的第一位客戶吧！',
+  ], ()=>{ ui.tutAdd=true; render(); }, {tut:true});
+}
+
+/* ===================== 業務：我的案件 ===================== */
+function profileCard(u){
+  const L=lvInfo(u.xp);
+  return `<div class="card profile orn" style="padding:16px">${avatar(u,64)}
+    <div style="flex:1;min-width:0">
+      <div class="px ptitle">${titleOf(u)}</div>
+      <div class="pname">${esc(u.name)}<span class="px lv">Lv.${L.lv}</span></div>
+      <div class="xpbar"><i style="width:${Math.round(L.cur/L.need*100)}%"></i></div>
+      <div class="xptext">升到 Lv.${L.lv+1} 還差 <b>${L.need-L.cur}</b> XP</div>
+    </div></div>`;
+}
+function sortCases(list){
+  return list.slice().sort((a,b)=> (isStale(b)-isStale(a)) || (a.st==='doing'?0:1)-(b.st==='doing'?0:1) || b.updated-a.updated);
+}
+function caseCard(c, showOwner){
+  const stale=isStale(c), o=userById(c.owner);
+  return `<button class="card case ${stale?'stale':''}" onclick="openCase('${c.id}')">
+    <div class="r1">${badge(c.st)}<span class="cat">${esc(catLabel(c))}</span></div>
+    <div class="cname">${esc(c.name)}</div>
+    ${!showOwner&&c.bossUnread?`<div class="bossflag">👑 會長有新留言</div>`:''}
+    ${showOwner?`<div class="owner">負責：${esc(o.name)}</div>`:''}
+    <div class="prog"><div class="bar"><i style="width:${c.p}%;background:${STATUS[c.st].c}"></i></div><span class="pct">${esc(stageLabel(c))} ${c.p}%</span></div>
+    <div class="meta ${stale?'warn':''}">${stale?`⚠ 已 ${daysSince(c.updated)} 天未更新`:`${agoText(c.updated)}更新`}</div>
+  </button>`;
+}
+function homeView(){
+  const u=me();
+  const mine=S.cases.filter(c=>c.owner===u.id);
+  const cnt=k=> k==='all'?mine.length : k==='stale'?mine.filter(isStale).length : mine.filter(c=>c.st===k).length;
+  if(ui.hf==='stale' && !cnt('stale')) ui.hf='all';
+  const f=ui.hf;
+  const list=sortCases(mine.filter(c=> f==='all' || (f==='stale'?isStale(c):c.st===f)));
+  const chips=[['all','全部',null],['doing','進行中','var(--red)'],['won','已成交','var(--green)'],['quiet','暫無回應','var(--blue)'],['no','無意願','var(--gray)']];
+  if(cnt('stale')) chips.push(['stale','⚠ 需更新',null]);
+  return `<div class="topbar"><h1 class="px">同欣冒險者公會</h1>${netBadge()}</div>
+    ${u.char?profileCard(u):''}
+    ${u.char&&jobInfo(u).pending?`<div class="card orn" style="border-color:var(--gold);padding:18px">
+      <b style="font-size:1.1rem">🌟 你已達到 Lv.25，可以二轉了！</b><div class="muted" style="margin:4px 0 10px">選一條屬於你的轉職路線吧。</div>
+      <button class="btn block" onclick="go('job')">前往轉職 ▶</button></div>`:''}
+    <div class="sec-title">📜 我的客戶案件</div>
+    <div class="chips">${chips.map(([k,l,c])=>`<button class="chip ${f===k?'on':''}" onclick="ui.hf='${k}';render()">${c?`<span class="dot" style="background:${c}"></span>`:''}${l} ${cnt(k)}</button>`).join('')}</div>
+    ${list.length ? list.map(c=>caseCard(c)).join('') :
+      `<div class="card empty">${`<div class="ava" style="border-color:#9db08a">${sprite('elara',48)}</div>`}
+       <p>${mine.length?'這個分類目前沒有案件。':'還沒有客戶，按下方「＋ 新增客戶」開始吧！'}</p></div>`}
+    <button class="btn fab ${ui.tutAdd?'pulse':''}" onclick="startAdd()">＋ 新增客戶</button>
+    ${navBar()}`;
+}
+
+/* ===================== 新增客戶 ===================== */
+function startAdd(){ ui.addCat=CATS[0]; ui.addStage=0; ui.addP=0; ui.addPSet=false; go('add'); }
+function addPInput(r){ ui.addP=+r.value; ui.addPSet=true; r.style.setProperty('--p', r.value/95*100); $('#a-plabel').textContent=r.value+'%'; }
+function pickOpt(g, v, el){
+  if(g==='cat'){ ui.addCat=v; const n=$('#a-catnote'); n.style.display = v==='其他' ? '' : 'none'; if(v==='其他') n.focus(); }
+  else { ui.addStage=v; const n=$('#a-stagenote'); n.style.display = v===OTHER_STAGE ? '' : 'none'; if(v===OTHER_STAGE) n.focus(); }
+  document.querySelectorAll(`.opt[data-g="${g}"]`).forEach(b=>b.classList.toggle('on', b===el));
+}
+const catLabel = c => c.cat==='其他' && c.catNote ? `其他：${c.catNote}` : c.cat;
+// 進度範圍：每個案件的階段順序可能不同，所以未完工時可自由微調 0～95%；完工固定 100%（＝成交）
+function pRange(stage){ return stage===STAGES.length-1 ? [100,100] : [0,95]; }
+function addView(){
+  return `<div class="topbar"><button class="back" onclick="go('home')">← 返回</button><h1 class="px">新增客戶</h1>${netBadge()}</div>
+  <div class="card">
+    <label class="f"><span>客戶名稱 <span class="req">*</span></span><input class="inp" id="a-name" placeholder="例如：A酒店"></label>
+    <div class="f"><span class="flabel">服務類別</span>
+      <div class="opts c2">${CATS.map(c=>`<button class="opt ${ui.addCat===c?'on':''}" data-g="cat" onclick="pickOpt('cat','${c}',this)">${c}</button>`).join('')}</div>
+      <input class="inp" id="a-catnote" style="margin-top:10px;${ui.addCat==='其他'?'':'display:none'}" placeholder="請說明服務內容">
+    </div>
+    <div class="f"><span class="flabel">目前階段</span>
+      <div class="opts c3">${STAGES.slice(0,-1).map((s,i)=>`<button class="opt ${ui.addStage===i?'on':''}" data-g="stage" onclick="pickOpt('stage',${i},this)">${s.n}</button>`).join('')}</div>
+      <input class="inp" id="a-stagenote" style="margin-top:10px;${ui.addStage===OTHER_STAGE?'':'display:none'}" placeholder="請輸入目前在做什麼，例如：燈光測試">
+    </div>
+    <div class="f"><span class="flabel">整體案件進度 <span class="req">*</span>　<span class="px bigpct" id="a-plabel">${ui.addPSet?ui.addP+'%':'<span class="muted" style="font-size:1rem">請拉動</span>'}</span></span>
+      <div class="phint">💡 請拉動進度條，評估<b>整個案件</b>從接洽到完工，目前大約走到哪裡（5% 一格）。</div>
+      <input type="range" id="a-p" min="0" max="95" step="5" value="${ui.addP||0}" style="--p:${(ui.addP||0)/95*100}" oninput="addPInput(this)">
+    </div>
+    <label class="f"><span>聯絡人</span><input class="inp" id="a-contact" placeholder="例如：李經理"></label>
+    <label class="f"><span>電話</span><input class="inp" id="a-phone" type="tel" placeholder="0912-345-678"></label>
+    <label class="f"><span>地址</span><input class="inp" id="a-addr" placeholder="台北市…"></label>
+    <div class="err" id="a-err"></div>
+    <button class="btn block" onclick="addCase()">建立案件（+${XP.add} XP）</button>
+  </div>`;
+}
+function addCase(){
+  const name=$('#a-name').value.trim();
+  if(!name){ $('#a-err').textContent='請填寫客戶名稱'; $('#a-name').focus(); return; }
+  const catNote=$('#a-catnote').value.trim();
+  if(ui.addCat==='其他' && !catNote){ $('#a-err').textContent='選了「其他」，請說明是什麼服務'; $('#a-catnote').focus(); return; }
+  const stageNote = ui.addStage===OTHER_STAGE ? $('#a-stagenote').value.trim() : '';
+  if(ui.addStage===OTHER_STAGE && !stageNote){ $('#a-err').textContent='選了「其他」階段，請填寫目前在做什麼'; $('#a-stagenote').focus(); return; }
+  if(!ui.addPSet){ $('#a-err').textContent='請拉動「整體案件進度」，評估目前大約走到哪裡'; return; }
+  const u=me(), stage=ui.addStage, p=ui.addP, now=Date.now();
+  const c={id:'c'+TS.uid(),owner:u.id,name,cat:ui.addCat,catNote:ui.addCat==='其他'?catNote:'',stage,stageNote,p,st:'doing',
+    contact:$('#a-contact').value.trim(),phone:$('#a-phone').value.trim(),addr:$('#a-addr').value.trim(),
+    created:now,updated:now,stagesDone:[stage],dealXP:false,noteDay:null,
+    hist:[{id:TS.uid(),t:now,by:u.id,stage,stageNote,p,st:'doing',note:'建立案件'}]};
+  if(!dispatch({ type:'addCase', case:c })) return;
+  const lv=award(u,[['新增客戶',XP.add]],c.id);
+  save(); ui.hf='all'; go('home');
+  toast(`✨ +${XP.add} XP　新增客戶`);
+  if(ui.tutAdd){
+    ui.tutAdd=false; dispatch({ type:'profile', set:{ tutDone:true } }); render();
+    elara([
+      `做得好！你接下了第一位客戶「<b>${esc(name)}</b>」，獲得 <b>+${XP.add} XP</b>！`,
+      `之後點進案件，就能<b>選階段、微調進度、寫備註</b>。每次更新記得寫一句備註或推進階段喔。階段到「<b>完工</b>」就算成交！<br>每到達一個新階段 +${XP.stage} XP，寫備註 +${XP.note} XP，<b>成交 +${XP.won} XP</b>！`,
+      '有任何問題，到「設定」可以重看教學。祝你冒險順利！⚔️',
+    ], ()=>levelFx(lv));
+  } else levelFx(lv);
+}
+
+/* ===================== 編輯／刪除客戶 ===================== */
+function startEdit(){ const c=caseById(ui.caseId); ui.addCat=c.cat; go('edit'); }
+function editView(){
+  const c=caseById(ui.caseId), earned=caseXP(c);
+  return `<div class="topbar"><button class="back" onclick="go('case')">← 返回</button><h1 class="px">編輯客戶資料</h1>${netBadge()}</div>
+  <div class="card">
+    <label class="f"><span>客戶名稱 <span class="req">*</span></span><input class="inp" id="a-name" value="${esc(c.name)}"></label>
+    <div class="f"><span class="flabel">服務類別</span>
+      <div class="opts c2">${CATS.map(k=>`<button class="opt ${ui.addCat===k?'on':''}" data-g="cat" onclick="pickOpt('cat','${k}',this)">${k}</button>`).join('')}</div>
+      <input class="inp" id="a-catnote" style="margin-top:10px;${ui.addCat==='其他'?'':'display:none'}" placeholder="請說明服務內容" value="${esc(c.catNote||'')}">
+    </div>
+    <label class="f"><span>聯絡人</span><input class="inp" id="a-contact" value="${esc(c.contact)}"></label>
+    <label class="f"><span>電話</span><input class="inp" id="a-phone" type="tel" value="${esc(c.phone)}"></label>
+    <label class="f"><span>地址</span><input class="inp" id="a-addr" value="${esc(c.addr)}"></label>
+    <div class="err" id="a-err"></div>
+    <button class="btn block" onclick="saveEdit()">儲存客戶資料</button>
+  </div>
+  <div style="margin:16px">${c.st==='won'
+    ? `<p class="muted" style="font-size:.9rem">🔒 已成交的案件不能刪除，以保留成交紀錄。如果真的需要刪除，請先請會長撤銷成交。</p>`
+    : `<button class="btn danger block" onclick="deleteCase()">🗑 刪除這個客戶</button>
+    <p class="muted" style="font-size:.9rem">刪除後無法復原${earned?`，這個案件獲得的 ${earned} XP 也會一併扣回`:''}。</p>`}</div>`;
+}
+const caseXP = c => S.xplog.filter(l=>l.caseId===c.id && l.uid===c.owner).reduce((s,l)=>s+l.xp,0);
+function saveEdit(){
+  const c=caseById(ui.caseId), name=$('#a-name').value.trim(), catNote=$('#a-catnote').value.trim();
+  if(!name){ $('#a-err').textContent='請填寫客戶名稱'; return; }
+  if(ui.addCat==='其他' && !catNote){ $('#a-err').textContent='選了「其他」，請說明是什麼服務'; return; }
+  dispatch({ type:'editCase', caseId:c.id, set:{name,cat:ui.addCat,catNote:ui.addCat==='其他'?catNote:'',contact:$('#a-contact').value.trim(),phone:$('#a-phone').value.trim(),addr:$('#a-addr').value.trim()} });
+  go('case'); toast('客戶資料已更新');
+}
+function deleteCase(){
+  const c=caseById(ui.caseId), u=me(), earned=caseXP(c);
+  if(c.st==='won'){ alert('已成交的案件不能刪除，請先請會長撤銷成交。'); return; }
+  if(!confirm(`確定要刪除「${c.name}」嗎？\n刪除後無法復原${earned?`，並扣回 ${earned} XP`:''}。`)) return;
+  if(!dispatch({ type:'deleteCase', caseId:c.id })) return;
+  if(earned) award(u,[['刪除客戶',-earned]],c.id);
+  go('home'); toast(`已刪除「${esc(c.name)}」`);
+}
+
+/* ===================== 經驗值 ===================== */
+function award(u, gains, caseId){
+  const before=lvInfo(u.xp).lv;
+  if(gains.length) dispatch(...gains.map(([why,xp])=>({ type:'xp', entry:{ id:TS.uid(), uid:u.id, caseId, why, xp, t:Date.now() } })));
+  const now=userById(u.id)||u;
+  return {before, after:lvInfo(now.xp).lv, u:now};
+}
+function levelFx(lv, then){
+  if(!lv || lv.after<=lv.before){ then&&then(); return; }
+  const u=lv.u, sb=jobStage(lv.before), sa=jobStage(lv.after);
+  let jobHtml='', btn=`<button class="btn block" onclick="$('#fx').innerHTML=''">太棒了！</button>`;
+  if(u.char && sa>sb){
+    if(sa>=2 && !u.char.path){
+      jobHtml=`<p style="font-size:1.1rem">🌟 你已達到 <b>Lv.25</b>，可以進行<b>二轉</b>了！<br>有兩條路線可以選擇。</p>`;
+      btn=`<button class="btn block" onclick="$('#fx').innerHTML='';go('job')">前往選擇轉職路線 ▶</button>`;
+    } else jobHtml=`<div class="px" style="font-size:1.3rem;color:#c27c00;margin-top:4px">✨ 轉職成功 ✨</div>
+      <p style="font-size:1.1rem;margin:6px 0">${jobName(u.char.cls,sb,u.char.path)} → <b>${jobInfo(u).name}</b></p>`;
+  }
+  $('#fx').innerHTML = `<div class="overlay fx"><div class="fxbox orn">
+    <span class="spark" style="left:6%;top:6%">✦</span><span class="spark" style="right:6%;top:8%;animation-delay:.4s">✧</span>
+    <span class="spark" style="left:8%;top:38%;animation-delay:.8s">✧</span><span class="spark" style="right:8%;top:42%;animation-delay:.2s">✦</span>
+    <div class="px fxbig">LEVEL UP!</div>${DIVIDER}
+    ${avatar(u,96)}
+    <div class="px" style="font-size:1.4rem;margin:8px 0">Lv.${lv.before} → Lv.${lv.after}</div>
+    ${jobHtml}
+    <p class="muted">艾拉：「越來越強了呢！繼續加油～」</p>
+    ${btn}</div></div>`;
+}
+
+/* ===================== 轉職 ===================== */
+function jobRoadCard(u){
+  const cls=u.char.cls, J=JOBS[cls], ji=jobInfo(u), lv=lvInfo(u.xp).lv;
+  const step=(st,name,sub)=>{ const done=ji.stage>=st && !(st>=2 && !ji.path), here=ji.stage===st;
+    return `<div class="road ${done?'done':''} ${here?'here':''}"><span class="px rl">Lv.${JOB_LV[st]}</span><span><b>${name}</b>${sub?`<br><span class="muted" style="font-size:.85rem">${sub}</span>`:''}</span>${here?'<span class="px" style="margin-left:auto;color:#c27c00">◀ 現在</span>':''}</div>`; };
+  const late = st => ji.path ? `${J[ji.path][st===2?'n2':'n3']}` : `${J.A[st===2?'n2':'n3']} 或 ${J.B[st===2?'n2':'n3']}`;
+  return `<div class="card"><h2>⚔️ 我的轉職之路</h2>
+    ${step(0,J.n[0])}${step(1,J.n[1],'一轉：武器強化')}${step(2,late(2),ji.path?'二轉：披風':'二轉：二選一，獲得披風')}${step(3,late(3),'三轉：光翼覺醒')}
+    <p class="muted" style="font-size:.9rem;margin:8px 0 0">目前 Lv.${lv}。頭像外框會隨轉職變成 銅 → 銀 → 金色。</p></div>`;
+}
+function jobView(){
+  const u=me(), cls=u.char.cls, J=JOBS[cls];
+  const opt=k=>`<div class="card orn" style="text-align:center;padding:18px">
+    <div class="preview" style="margin-bottom:10px">${sprite({...u.char,stage:2,path:k},110)}</div>
+    <div class="px" style="font-size:1.4rem">${J[k].n2}</div>
+    <p style="margin:4px 0">${J[k].d}</p>
+    <p class="muted" style="font-size:.9rem;margin:0 0 12px">Lv.50 三轉 → <b>${J[k].n3}</b></p>
+    <button class="btn block" onclick="chooseJob('${k}')">選擇「${J[k].n2}」</button></div>`;
+  return `<div class="topbar"><button class="back" onclick="go('home')">← 返回</button><h1 class="px">二轉：選擇路線</h1>${netBadge()}</div>
+    <div class="card dlg" style="margin:14px 16px;animation:none"><div class="ava" style="border-color:#9db08a">${sprite('elara',96,'bust')}</div>
+      <div class="dlg-body"><div class="px dlg-name">艾拉 Elara</div><div class="dlg-text">恭喜到達 Lv.25！兩條路線都一樣強，只是外觀和稱號不同，選你喜歡的就好～<br><b>選定之後就不能更改</b>喔。</div></div></div>
+    ${opt('A')}${opt('B')}${navBar()}`;
+}
+function chooseJob(k){
+  const u=me(), J=JOBS[u.char.cls][k];
+  if(!confirm(`確定要轉職為「${J.n2}」嗎？\n選定之後就不能更改。`)) return;
+  dispatch({ type:'profile', set:{ char:{...u.char, path:k} } }); go('home');
+  $('#fx').innerHTML = `<div class="overlay fx"><div class="fxbox orn">
+    <span class="spark" style="left:6%;top:6%">✦</span><span class="spark" style="right:6%;top:8%;animation-delay:.4s">✧</span>
+    <div class="px fxbig gold">轉職！</div>${DIVIDER}${avatar(u,110)}
+    <p style="font-size:1.2rem;margin:10px 0 4px">${JOBS[u.char.cls].n[1]} → <b>${jobInfo(u).name}</b></p>
+    <p class="muted">艾拉：「好帥氣的披風！繼續朝 Lv.50 的『${J.n3}』前進吧！」</p>
+    <button class="btn block" onclick="$('#fx').innerHTML=''">出發！</button></div></div>`;
+}
+
+/* ===================== 案件詳情 / 更新 ===================== */
+function openCase(id){ ui.from=ui.page; const c=caseById(id); ui.st=c.st; if(c.bossUnread && me() && c.owner===me().id) dispatch({ type:'readBoss', caseId:id }); go('case',{caseId:id}); }
+function caseView(){
+  const c=caseById(ui.caseId), u=me(), o=userById(c.owner), canEdit=c.owner===u.id, isBoss=u.role==='boss';
+  const back = ui.from || homePage();
+  return `<div class="topbar"><button class="back" onclick="go('${back}')">← 返回</button><h1 class="px">案件內容</h1>${netBadge()}</div>
+  <div class="card">
+    <div class="r1" style="display:flex;justify-content:space-between;align-items:center">${badge(c.st)}<span class="muted">${esc(catLabel(c))}</span></div>
+    <div class="cname" style="font-size:1.5rem">${esc(c.name)}</div>
+    ${!canEdit?`<div class="mini" style="margin:6px 0">${avatar(o,28)}<div>${displayName(o)} <span class="px lv">Lv.${lvInfo(o.xp).lv}</span></div></div>`:''}
+    <div class="prog" style="margin:8px 0"><div class="bar"><i style="width:${c.p}%;background:${STATUS[c.st].c}"></i></div><span class="pct">${esc(stageLabel(c))} ${c.p}%</span></div>
+    ${isStale(c)?`<div class="warn">⚠ 已 ${daysSince(c.updated)} 天未更新</div>`:`<div class="muted">${agoText(c.updated)}更新</div>`}
+    <div style="margin-top:10px;line-height:1.8">
+      ${c.contact?`👤 ${esc(c.contact)}<br>`:''}${c.phone?`📞 <a href="tel:${esc(c.phone)}">${esc(c.phone)}</a><br>`:''}${c.addr?`📍 ${esc(c.addr)}`:''}
+    </div>
+  </div>
+  ${canEdit?`<div style="margin:0 16px"><button class="btn ghost block" onclick="startEdit()">✏️ 編輯客戶資料</button></div>`:''}
+  ${canEdit?`<div class="card">
+    <h2>更新進度</h2>
+    <div class="f"><span class="flabel">目前階段</span>
+      <input type="hidden" id="f-stage" value="${c.stage}">
+      <div class="opts c3">${STAGES.map((s,i)=>`<button class="opt ${c.stage===i?'on':''}" data-si="${i}" onclick="setStage(${i})">${s.n}</button>`).join('')}</div>
+      <input class="inp" id="f-stagenote" style="margin-top:10px;${c.stage===OTHER_STAGE?'':'display:none'}" placeholder="請輸入目前在做什麼，例如：燈光測試" value="${esc(c.stageNote||'')}">
+    </div>
+    <div class="f"><span style="font-weight:700">整體案件進度</span>　<span class="px bigpct" id="f-plabel">${c.p}%</span>
+      <div class="phint">💡 請自己拉動進度條，評估<b>整個案件</b>從接洽到完工，目前大約走到哪裡（5% 一格），不是這個階段的完成度。</div>
+      <input type="range" id="f-p" step="5" value="${c.p}">
+      <div class="muted" id="f-prange" style="font-size:.9rem"></div></div>
+    <div class="f"><div style="font-weight:700;margin-bottom:6px">狀態</div>
+      <div class="stgrid">${Object.entries(STATUS).map(([k,v])=>`<button class="stbtn ${ui.st===k?'on':''}" style="--c:${v.c}" data-st="${k}" onclick="pickSt('${k}')">${ui.st===k?'✔ ':''}${v.n}</button>`).join('')}</div></div>
+    <label class="f"><span>這次的回報備註</span><textarea class="inp" id="f-note" placeholder="例如：今天跟經理見面，下週要報價"></textarea></label>
+    <div class="err" id="f-err"></div>
+    <button class="btn block" onclick="saveCase()">儲存更新</button>
+    <p class="muted" style="font-size:.9rem;margin:8px 0 0">階段選到「完工」就是成交，狀態會自動變成「已成交」。<br>新階段 +${XP.stage}／寫備註 +${XP.note}／成交 +${XP.won} XP（取消成交會扣回）。</p>
+  </div>`:''}
+  ${isBoss?`<div class="card orn" style="padding:18px"><h2>👑 會長操作</h2>
+    <label class="f"><span>留言給 ${esc(o.name)}</span><textarea class="inp" id="b-note" placeholder="例如：這家我認識老闆，價格可以再讓一點"></textarea></label>
+    <div class="err" id="b-err"></div>
+    <button class="btn block" onclick="bossComment()">送出留言</button>
+    <div class="f" style="margin:18px 0 0"><span class="flabel">轉派給其他業務</span>
+      <div class="row"><select class="inp" id="b-owner">${S.users.filter(x=>x.role==='sales').map(x=>`<option value="${x.id}" ${x.id===c.owner?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <button class="btn ghost" style="flex:0 0 auto" onclick="transferCase()">轉派</button></div></div>
+    ${c.dealXP?`<button class="btn danger block" style="margin-top:18px" onclick="revokeDeal('${c.id}')">撤銷成交（扣回 ${XP.won} XP）</button>`:''}
+  </div>`:''}
+  <div class="sec-title">🕘 更新紀錄</div>
+  <div class="card"><ul class="tl">${c.hist.map(h=>{ const b=userById(h.by);
+    if(h.kind==='boss') return `<li><div class="when">${fmt(h.t)}　👑 會長留言</div><div class="note boss">${esc(h.note)}</div></li>`;
+    return `<li><div class="when">${fmt(h.t)}　${b.role==='boss'?'👑 會長':esc(b.name)}</div>
+      <div>${esc(stageLabel(h))} ${h.p}%　${badge(h.st)}</div>${h.note?`<div class="note">${esc(h.note)}</div>`:''}</li>`; }).join('')}</ul></div>
+  ${navBar()}`;
+}
+function initCaseForm(){
+  const s=$('#f-stage'), r=$('#f-p'); if(!s) return;
+  const sync=()=>{ const lo=+r.min, hi=+r.max; r.style.setProperty('--p', hi>lo ? (r.value-lo)/(hi-lo)*100 : 100); $('#f-plabel').textContent=r.value+'%'; };
+  const setRange=()=>{ const st=+s.value, [lo,hi]=pRange(st); r.min=lo; r.max=hi;
+    if(+r.value<lo || +r.value>hi) r.value=Math.min(Math.max(+r.value,lo),hi);   // 選階段不自動改進度，只確保在範圍內
+    if(lo===hi){ r.min=0; r.max=100; r.value=100; }            // 完工：拉桿停在最右邊並鎖定
+    r.disabled = lo===hi; $('#f-prange').textContent = lo===hi ? '完工固定為 100%（＝成交）' : '選階段不會自動改變進度，請自己拉動（階段順序不限）'; sync(); };
+  s.onchange=()=>{
+    document.querySelectorAll('[data-si]').forEach(b=>b.classList.toggle('on', +b.dataset.si===+s.value));
+    const n=$('#f-stagenote'); n.style.display = +s.value===OTHER_STAGE ? '' : 'none';
+    if(+s.value===OTHER_STAGE && !n.value) n.focus();
+    if(+s.value!==DONE_STAGE && +r.value>=100) r.value=95;
+    setRange(); if(+s.value===DONE_STAGE) pickSt('won',true); else if(ui.st==='won') pickSt('doing',true); };
+  r.oninput=sync; setRange(false);
+}
+function setStage(i){ const s=$('#f-stage'); s.value=i; s.onchange(); }
+function pickSt(k, fromStage){
+  const s=$('#f-stage'), last=STAGES.length-1;
+  if(s && !fromStage){                                   // 狀態和階段互相同步
+    if(k==='won' && +s.value!==last){ s.value=last; s.onchange(); return; }
+    if(k!=='won' && +s.value===last){ s.value=SIGN_STAGE; s.onchange(); }
+  }
+  ui.st=k;
+  document.querySelectorAll('.stbtn').forEach(b=>{ const on=b.dataset.st===k; b.classList.toggle('on',on); b.textContent=(on?'✔ ':'')+STATUS[b.dataset.st].n; });
+}
+function saveCase(){
+  const c=caseById(ui.caseId), u=me();
+  let stage=+$('#f-stage').value, p=+$('#f-p').value, st=ui.st;
+  const note=$('#f-note').value.trim(), last=STAGES.length-1;
+  if(st==='won' || stage===last){ st='won'; stage=last; p=100; }
+  const stageNote = stage===OTHER_STAGE ? $('#f-stagenote').value.trim() : '';
+  if(stage===OTHER_STAGE && !stageNote){ $('#f-err').textContent='選了「其他」階段，請填寫目前在做什麼'; $('#f-stagenote').focus(); return; }
+  if(!note && stage===c.stage && st===c.st && stageNote===(c.stageNote||'')){
+    $('#f-err').textContent='請寫一句回報備註，或更新階段／狀態後再儲存'; $('#f-note').focus(); return; }
+  const gains=[], set={}, now=Date.now();
+  const done=(c.stagesDone||[c.stage]).slice();
+  if(!done.includes(stage)){ gains.push(['新階段', XP.stage]); done.push(stage); }
+  set.stagesDone=done;
+  const today=new Date().toDateString();
+  if(note && c.noteDay!==today){ gains.push(['回報備註', XP.note]); set.noteDay=today; }
+  let won=false, blocked=false, cancelOther=null, dealXP=c.dealXP, wonAt=c.wonAt, wonBy=c.wonBy;
+  if(c.dealXP && st!=='won'){                              // 取消成交：從當初拿到經驗值的人扣回
+    const wu=userById(c.wonBy)||u;
+    if(wu.id===u.id) gains.push(['取消成交', -XP.won]); else cancelOther=wu;
+    dealXP=false; wonAt=null; wonBy=null; }
+  if(st==='won' && !dealXP){
+    wonAt=now;
+    if(c.revoked) blocked=true;                            // 會長撤銷過：再次成交不發經驗值
+    else { gains.push(['成交', XP.won]); dealXP=true; wonBy=u.id; won=true; }
+  }
+  Object.assign(set,{stage,stageNote,p,st,updated:now,dealXP,wonAt,wonBy});
+  if(!dispatch({ type:'updateCase', caseId:c.id, set, hist:{id:TS.uid(),t:now,by:u.id,stage,stageNote,p,st,note} })) return;
+  if(cancelOther) award(cancelOther,[['取消成交',-XP.won]],c.id);
+  const lv=award(u,gains,c.id);
+  go('home');
+  const small=gains.filter(g=>g[0]!=='成交');
+  if(blocked) toast('已更新為成交。此案件曾被會長撤銷成交，不再發放成交經驗值');
+  else if(small.length) toast((small.some(g=>g[1]<0)?'':'✨ ')+small.map(g=>`${g[1]>0?'+':''}${g[1]} XP ${g[0]}`).join('　'));
+  else if(!won) toast('已儲存更新');
+  if(won){
+    $('#fx').innerHTML = `<div class="overlay fx"><div class="fxbox orn">
+      <span class="spark" style="left:6%;top:6%">🎉</span><span class="spark" style="right:6%;top:6%;animation-delay:.5s">✨</span>
+      <div class="px fxbig gold">成交！</div>${DIVIDER}
+      <div class="ava" style="border-color:#9db08a">${sprite('elara',110,'bust')}</div>
+      <p style="font-size:1.15rem">恭喜拿下「<b>${esc(c.name)}</b>」！</p>
+      <div class="px" style="font-size:1.6rem;color:var(--xp)">+${XP.won} XP</div>
+      <button class="btn block" style="margin-top:14px" id="fx-ok">好耶！</button></div></div>`;
+    $('#fx-ok').onclick=()=>{ $('#fx').innerHTML=''; levelFx(lv); };
+  } else levelFx(lv);
+}
+function bossComment(){
+  const c=caseById(ui.caseId), note=$('#b-note').value.trim();
+  if(!note){ $('#b-err').textContent='請先寫下留言內容'; return; }
+  dispatch({ type:'bossComment', caseId:c.id, hist:{id:TS.uid(),t:Date.now(),by:me().id,stage:c.stage,p:c.p,st:c.st,note,kind:'boss'} });
+  render(); toast('留言已送出，業務打開案件就會看到');
+}
+function transferCase(){
+  const c=caseById(ui.caseId), to=$('#b-owner').value;
+  if(to===c.owner){ toast('已經是這位業務負責'); return; }
+  const a=userById(c.owner), b=userById(to);
+  if(!confirm(`確定要把「${c.name}」從 ${a.name} 轉派給 ${b.name} 嗎？\n已經獲得的經驗值會留在 ${a.name} 身上。`)) return;
+  dispatch({ type:'transfer', caseId:c.id, to, hist:{id:TS.uid(),t:Date.now(),by:me().id,stage:c.stage,p:c.p,st:c.st,note:`會長將案件從 ${a.name} 轉派給 ${b.name}`,kind:'boss'} });
+  render(); toast(`已轉派給 ${b.name}`);
+}
+function revokeDeal(id){
+  const c=caseById(id), o=userById(c.wonBy)||userById(c.owner);
+  if(!confirm(`確定要撤銷「${c.name}」的成交嗎？\n${o.name} 會被扣回 ${XP.won} XP，案件改回「進行中」。\n之後這個案件再次成交，也不會重新發放成交經驗值。`)) return;
+  const p=Math.min(c.p,95);
+  dispatch({ type:'revoke', caseId:c.id, set:{dealXP:false,wonAt:null,wonBy:null,revoked:true,st:'doing',stage:SIGN_STAGE,p},
+             hist:{id:TS.uid(),t:Date.now(),by:me().id,stage:SIGN_STAGE,p,st:'doing',note:'會長撤銷成交'} });
+  award(o,[['撤銷成交',-XP.won]],c.id);
+  ui.st='doing'; render(); toast('已撤銷成交，並扣回經驗值');
+}
+
+/* ===================== 老闆：公會大廳 ===================== */
+function lobbyView(){
+  const all=S.cases, sales=S.users.filter(u=>u.role==='sales');
+  const n=k=> k==='stale'?all.filter(isStale).length : k==='all'?all.length : all.filter(c=>c.st===k).length;
+  const tiles=[['doing','進行中','var(--red)'],['won','已成交','var(--green)'],['quiet','暫無回應','var(--blue)'],
+               ['no','無意願','var(--gray)'],['stale','⚠ 逾期','var(--warn)'],['all','全部案件','var(--navy)']];
+  return `<div class="topbar"><h1 class="px">👑 公會大廳</h1>${netBadge()}</div>
+  <div class="card profile">${avatar(me(),56)}<div><div class="pname">公會會長（老闆）</div><div class="muted">同欣冒險者公會 · ${sales.length} 位冒險者</div></div></div>
+  <div class="tiles">${tiles.map(([k,l,c])=>`<div class="tile" onclick="lobbyFilter({st:'${k}',owner:'all'})" style="border-top:8px solid ${c}">
+     <div class="n px" style="color:${c}">${n(k)}</div><div class="l">${l}</div></div>`).join('')}</div>
+  <div style="margin:0 16px"><button class="btn block" onclick="exportExcel()">📥 匯出 Excel 報表</button></div>
+
+  <div class="sec-title">📅 每月戰績</div>
+  ${monthCard()}
+
+  <div class="sec-title">🧙 業務一覽</div>
+  <div class="card" style="padding:8px 10px"><table class="tbl"><tr><th>業務</th><th>案件</th><th>進行</th><th>成交</th><th>逾期</th></tr>
+   ${sales.map(u=>{ const m=all.filter(c=>c.owner===u.id), st=m.filter(isStale).length;
+     return `<tr class="click" onclick="lobbyFilter({owner:'${u.id}',st:'all'})"><td><div class="mini">${avatar(u,22)}<div><b>${esc(u.name)}</b><br><span class="px lv" style="margin:0;font-size:.85rem">Lv.${lvInfo(u.xp).lv}</span></div></div></td>
+       <td>${m.length}</td><td>${m.filter(c=>c.st==='doing').length}</td><td style="color:var(--green);font-weight:700">${m.filter(c=>c.st==='won').length}</td>
+       <td class="${st?'warn':''}">${st||'–'}</td></tr>`; }).join('')}</table></div>
+
+  <div class="sec-title">📊 各類別成交狀況</div>
+  <div class="card"><p class="muted" style="font-size:.9rem;margin:0 0 10px">成交件數 ／ 新增客戶數</p>
+   ${CATS.map(cat=>{ const m=all.filter(c=>c.cat===cat), w=m.filter(c=>c.st==='won').length;
+     return `<div class="catrow"><div class="row"><b>${cat}</b><span class="px" style="font-size:1.15rem"><span style="color:var(--green)">${w}</span> ／ ${m.length}</span></div>
+       <div class="bar"><i style="width:${m.length?w/m.length*100:0}%;background:var(--green)"></i></div></div>`; }).join('')}</div>
+
+  <div class="sec-title" id="lobby-list">📋 所有案件</div>
+  <div class="card">
+    <input class="inp" id="lf-q" placeholder="🔍 搜尋客戶名稱" value="${esc(ui.lf.q)}" oninput="ui.lf.q=this.value;drawLobbyList()">
+    <div class="row" style="margin-top:10px">
+      <select class="inp" onchange="ui.lf.owner=this.value;drawLobbyList()"><option value="all">全部業務</option>${sales.map(u=>`<option value="${u.id}" ${ui.lf.owner===u.id?'selected':''}>${esc(u.name)}</option>`).join('')}</select>
+      <select class="inp" onchange="ui.lf.cat=this.value;drawLobbyList()"><option value="all">全部類別</option>${CATS.map(c=>`<option ${ui.lf.cat===c?'selected':''}>${c}</option>`).join('')}</select>
+    </div>
+  </div>
+  <div class="chips" id="lf-chips"></div>
+  <div id="lf-list"></div>
+  ${navBar()}`;
+}
+function monthCard(){
+  const now=new Date(), mo=ui.mon||0, a=new Date(now.getFullYear(),now.getMonth()-mo,1).getTime(), b=new Date(now.getFullYear(),now.getMonth()-mo+1,1).getTime();
+  const inR=t=>t&&t>=a&&t<b, sales=S.users.filter(u=>u.role==='sales');
+  const nw=S.cases.filter(c=>inR(c.created)), wn=S.cases.filter(c=>inR(c.wonAt)), label=`${new Date(a).getMonth()+1} 月`;
+  return `<div class="card">
+    <div class="row" style="margin-bottom:12px">${[['本月',0],['上個月',1]].map(([l,v])=>`<button class="chip ${mo===v?'on':''}" style="flex:1;justify-content:center" onclick="ui.mon=${v};render()">${l}</button>`).join('')}</div>
+    <div class="row" style="text-align:center;margin-bottom:8px">
+      <div style="flex:1"><div class="px" style="font-size:1.8rem;color:var(--navy)">${nw.length}</div><div class="muted">${label}新增客戶</div></div>
+      <div style="flex:1"><div class="px" style="font-size:1.8rem;color:var(--green)">${wn.length}</div><div class="muted">${label}成交</div></div></div>
+    <table class="tbl"><tr><th>業務</th><th>新增</th><th>成交</th></tr>
+    ${sales.map(u=>{ const x=nw.filter(c=>c.owner===u.id).length, y=wn.filter(c=>c.owner===u.id).length;
+      return `<tr><td>${esc(u.name)}</td><td>${x||'–'}</td><td style="color:var(--green);font-weight:700">${y||'–'}</td></tr>`; }).join('')}</table></div>`;
+}
+function lobbyFilter(f){ Object.assign(ui.lf,f); render(); setTimeout(()=>$('#lobby-list').scrollIntoView({behavior:'smooth'}),30); }
+function drawLobbyList(){
+  const f=ui.lf;
+  const chips=[['all','全部',null],['doing','進行中','var(--red)'],['won','已成交','var(--green)'],['quiet','暫無回應','var(--blue)'],['no','無意願','var(--gray)'],['stale','⚠ 逾期',null]];
+  $('#lf-chips').innerHTML = chips.map(([k,l,c])=>`<button class="chip ${f.st===k?'on':''}" onclick="ui.lf.st='${k}';drawLobbyList()">${c?`<span class="dot" style="background:${c}"></span>`:''}${l}</button>`).join('');
+  const list=sortCases(S.cases.filter(c=>
+    (f.owner==='all'||c.owner===f.owner) && (f.cat==='all'||c.cat===f.cat) &&
+    (f.st==='all'||(f.st==='stale'?isStale(c):c.st===f.st)) && (!f.q||c.name.includes(f.q.trim()))));
+  $('#lf-list').innerHTML = list.length ? list.map(c=>caseCard(c,true)).join('') : `<div class="card empty muted">沒有符合的案件</div>`;
+}
+
+/* ===================== 匯出 Excel ===================== */
+function exportExcel(){
+  const d=t=>{ if(!t) return ''; const x=new Date(t), p=n=>String(n).padStart(2,'0'); return `${x.getFullYear()}/${p(x.getMonth()+1)}/${p(x.getDate())} ${p(x.getHours())}:${p(x.getMinutes())}`; };
+  const name=id=>{ const u=userById(id); return !u ? '' : u.role==='boss' ? '會長' : u.name; };
+  const sorted=S.cases.slice().sort((a,b)=>name(a.owner).localeCompare(name(b.owner),'zh-Hant')||b.updated-a.updated);
+  const cases=sorted.map(c=>({ '客戶名稱':c.name, '負責業務':name(c.owner), '服務類別':catLabel(c), '目前階段':stageLabel(c), '整體進度(%)':c.p,
+    '狀態':STATUS[c.st].n, '聯絡人':c.contact||'', '電話':c.phone||'', '地址':c.addr||'', '建立日期':d(c.created), '最後更新':d(c.updated),
+    '未更新天數':daysSince(c.updated), '逾期提醒':isStale(c)?'是':'', '成交日期':d(c.wonAt) }));
+  const hist=[]; sorted.forEach(c=>c.hist.forEach(x=>hist.push({ '客戶名稱':c.name, '時間':d(x.t), '更新者':name(x.by),
+    '類型':x.kind==='boss'?'會長留言':'進度更新', '階段':x.kind==='boss'?'':stageLabel(x), '進度(%)':x.kind==='boss'?'':x.p,
+    '狀態':x.kind==='boss'?'':STATUS[x.st].n, '備註／留言':x.note||'' })));
+  const now=new Date(), m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
+  const stats=S.users.filter(u=>u.role==='sales').map(u=>{ const m=S.cases.filter(c=>c.owner===u.id), k=s=>m.filter(c=>c.st===s).length;
+    return { '業務':u.name, '等級':lvInfo(u.xp).lv, '稱號':u.char?jobInfo(u).name:'（尚未建立角色）', '案件數':m.length, '進行中':k('doing'), '已成交':k('won'),
+      '暫無回應':k('quiet'), '無意願':k('no'), '逾期未更新':m.filter(isStale).length,
+      '本月新增':m.filter(c=>c.created>=m0).length, '本月成交':m.filter(c=>c.wonAt&&c.wonAt>=m0).length }; });
+  const day=d(Date.now()).slice(0,10).split('/').join('-'), file=`同欣案件報表_${day}`;
+  if(window.XLSX){
+    const wb=XLSX.utils.book_new();
+    const add=(rows,title,widths)=>{ const ws=XLSX.utils.json_to_sheet(rows); ws['!cols']=widths.map(w=>({wch:w})); XLSX.utils.book_append_sheet(wb,ws,title); };
+    add(cases,'案件總覽',[18,10,18,14,12,10,10,15,22,17,17,10,9,17]);
+    add(hist,'更新紀錄',[18,17,10,10,14,9,10,40]);
+    add(stats,'業務統計',[10,6,12,8,8,8,10,8,10,10,10]);
+    XLSX.writeFile(wb, file+'.xlsx');
+  } else {                                                   // 沒網路載不到套件時，改匯出 CSV（Excel 也能打開）
+    const q=v=>'"'+String(v).split('"').join('""')+'"';
+    const csv=[Object.keys(cases[0]||{}).map(q).join(',')].concat(cases.map(r=>Object.values(r).map(q).join(','))).join(String.fromCharCode(13,10));
+    const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([String.fromCharCode(0xFEFF)+csv],{type:'text/csv'})); a.download=file+'.csv'; a.click();
+  }
+  toast('📥 報表已下載');
+}
+
+/* ===================== 公會名冊 ===================== */
+function rosterView(){
+  const boss=S.users.find(u=>u.role==='boss');
+  const sales=S.users.filter(u=>u.role==='sales').sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant'));
+  const row=u=>{ const L=lvInfo(u.xp);
+    return `<div class="card member">${avatar(u,44)}<div style="flex:1;min-width:0">
+      <div class="px ptitle">${u.role==='boss'?'👑 公會會長':titleOf(u)}</div>
+      <div class="pname" style="font-size:1.15rem">${u.role==='boss'?'公會會長（老闆）':esc(u.name)}${u.role==='boss'?'':`<span class="px lv">Lv.${L.lv}</span>`}</div>
+      ${u.role!=='boss'&&!u.char?'<div class="muted">尚未建立角色</div>':''}</div></div>`; };
+  return `<div class="topbar"><h1 class="px">🏰 公會名冊</h1>${netBadge()}</div>
+    <p class="hint">同欣冒險者公會的所有成員（依姓名排列）</p>
+    ${row(boss)}${sales.map(row).join('')}${navBar()}`;
+}
+
+/* ===================== 設定 ===================== */
+function settingsView(){
+  const u=me();
+  return `<div class="topbar"><h1 class="px">⚙️ 設定</h1>${netBadge()}</div>
+  <div class="card">
+    <div class="sw"><div><b>大字模式</b><div class="muted" style="font-size:.9rem">把所有文字放大，看得更清楚</div></div>
+      <button class="toggle ${S.prefs.big?'on':''}" aria-label="大字模式" onclick="S.prefs.big=!S.prefs.big;save();render()"></button></div>
+  </div>
+  <div class="card" style="padding:4px 14px">
+    ${u.role==='sales'?`<button class="setbtn" onclick="startCreate()">🎨 修改角色外觀</button>`:''}
+    ${u.role==='boss'?`<button class="setbtn" onclick="go('members')">👥 成員管理</button>`:''}
+    <button class="setbtn" onclick="go('pin')">🔑 修改密碼</button>
+    <button class="setbtn" onclick="replayTut()">🧚 重看新手教學</button>
+    <button class="setbtn" onclick="logout()">🚪 登出</button>
+  </div>
+  <div class="card"><h2>經驗值怎麼算？</h2>
+    <table class="xptbl" style="width:100%"><tr><td>新增客戶</td><td>+${XP.add}</td></tr><tr><td>到達新的階段（每案每階段一次）</td><td>+${XP.stage}</td></tr>
+    <tr><td>寫回報備註（每案每天一次）</td><td>+${XP.note}</td></tr><tr><td>成交</td><td>+${XP.won}</td></tr></table>
+    </div>
+  ${u.char?jobRoadCard(u):''}
+  <div class="card"><h2>☁️ 資料同步</h2>
+    <p class="muted" style="font-size:.95rem;margin:0 0 10px">沒有網路時也可以照常新增和更新，資料會先存在手機裡，連上網路後自動同步。右上角會顯示同步狀態。</p>
+    <button class="btn ghost block" onclick="sync()">立即同步</button></div>
+  ${navBar()}`;
+}
+/* ===================== 成員管理（會長）與修改密碼 ===================== */
+const needNet = () => navigator.onLine ? '' : '<div class="notice">📴 這個功能需要網路，請連上網路後再操作。</div>';
+function membersView(){
+  const list=(S.members||[]).slice().sort((a,b)=>(b.active-a.active)||((a.role==='boss'?0:1)-(b.role==='boss'?0:1))||a.name.localeCompare(b.name,'zh-Hant'));
+  const owned=id=>S.cases.filter(c=>c.owner===id).length;
+  return `<div class="topbar"><button class="back" onclick="go('settings')">← 返回</button><h1 class="px">👥 成員管理</h1>${netBadge()}</div>
+  ${needNet()}
+  <div style="margin:14px 16px"><button class="btn block" onclick="editMember(null)">＋ 新增成員</button></div>
+  ${list.map(m=>`<button class="card case" style="opacity:${m.active?1:.6}" onclick="editMember('${m.id}')">
+      <div class="r1"><span class="cname" style="margin:0">${esc(m.name)}</span>
+        <span class="badge" style="background:${m.role==='boss'?'var(--gold-d)':'var(--navy)'}">${m.role==='boss'?'👑 會長':'業務'}</span></div>
+      <div class="meta">${m.active?'啟用中':'<span class="warn">已停用</span>'}${owned(m.id)?`・負責 ${owned(m.id)} 件案件`:''}
+        ${!m.active&&owned(m.id)?'<br><span class="warn">⚠ 請把他的案件轉派給其他業務</span>':''}</div></button>`).join('')}
+  <p class="hint">停用的成員不能登入，但他的案件和紀錄都會保留。點成員可以改名、重設密碼或停用。</p>
+  ${navBar()}`;
+}
+function editMember(id){ const m=(S.members||[]).find(x=>x.id===id); ui.memberId=id; ui.mRole=m?m.role:'sales'; ui.mActive=m?m.active:true; go('member'); }
+function memberView(){
+  const m=(S.members||[]).find(x=>x.id===ui.memberId), isNew=!m, self=m&&m.id===me().id;
+  return `<div class="topbar"><button class="back" onclick="go('members')">← 返回</button><h1 class="px">${isNew?'新增成員':'編輯成員'}</h1>${netBadge()}</div>
+  ${needNet()}
+  <div class="card">
+    <label class="f"><span>姓名 <span class="req">*</span></span><input class="inp" id="m-name" maxlength="20" value="${esc(m?m.name:'')}" placeholder="請輸入本名"></label>
+    <label class="f"><span>${isNew?'密碼 <span class="req">*</span>':'重設密碼'}</span>
+      <input class="inp" id="m-pin" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="${isNew?'4 位數字':'留空代表不改'}"></label>
+    <div class="f"><span class="flabel">身分</span>
+      <div class="opts c2">${[['sales','業務'],['boss','👑 會長']].map(([k,l])=>`<button class="opt ${ui.mRole===k?'on':''}" ${self?'disabled':''} onclick="ui.mRole='${k}';render()">${l}</button>`).join('')}</div>
+      ${self?'<p class="muted" style="font-size:.9rem;margin:6px 0 0">不能取消自己的會長身分。</p>':''}</div>
+    ${isNew?'':`<div class="sw"><div><b>啟用</b><div class="muted" style="font-size:.9rem">停用後不能登入，案件和紀錄都會保留</div></div>
+      <button class="toggle ${ui.mActive?'on':''}" aria-label="啟用" ${self?'disabled':''} onclick="ui.mActive=!ui.mActive;this.classList.toggle('on')"></button></div>`}
+    <div class="err" id="m-err"></div>
+    <button class="btn block" id="m-save" onclick="saveMember()">${isNew?'新增成員':'儲存'}</button>
+  </div>${navBar()}`;
+}
+async function saveMember(){
+  const m=(S.members||[]).find(x=>x.id===ui.memberId), name=$('#m-name').value.trim(), pin=$('#m-pin').value.trim(), err=$('#m-err');
+  if(!name){ err.textContent='請輸入姓名'; return; }
+  if((!m || pin) && !/^\d{4}$/.test(pin)){ err.textContent='密碼要是 4 位數字'; return; }
+  if(m && m.active && !ui.mActive && !confirm(`確定要停用「${m.name}」嗎？停用後他就不能登入。`)) return;
+  const r = await adminCall(m ? { cmd:'updateUser', uid:m.id, name, pin, role:ui.mRole, active:ui.mActive } : { cmd:'addUser', name, pin, role:ui.mRole }, err);
+  if(r){ go('members'); toast(esc(r.message)); }
+}
+// 需要網路的操作：送出時鎖住按鈕，失敗會在表單上顯示原因
+async function adminCall(body, errEl){
+  if(!navigator.onLine){ errEl.textContent='這個功能需要網路'; return null; }
+  const btn=document.querySelector('#app .btn.block:not(.ghost)'); if(btn){ btn.disabled=true; btn.textContent='處理中…'; }
+  try{
+    const r=await api(Object.assign({ action:'admin', token:TOKEN }, body));
+    if(!r.ok){ if(r.error==='AUTH'){ forceLogout(r.message); return null; } errEl.textContent=r.message||'操作失敗'; return null; }
+    setServerState(r.state); persist(); loadRoster(); return r;
+  }catch(e){ errEl.textContent='連線失敗，請稍後再試'; return null; }
+  finally{ if(btn && document.body.contains(btn)){ btn.disabled=false; btn.textContent='儲存'; } }
+}
+function pinView(){
+  const f=(id,l)=>`<label class="f"><span>${l}</span><input class="inp" id="${id}" type="password" inputmode="numeric" maxlength="4" autocomplete="off"></label>`;
+  return `<div class="topbar"><button class="back" onclick="go('settings')">← 返回</button><h1 class="px">🔑 修改密碼</h1>${netBadge()}</div>
+  ${needNet()}
+  <div class="card">${f('p-old','目前的密碼')}${f('p-new','新密碼（4 位數字）')}${f('p-new2','再輸入一次新密碼')}
+    <div class="err" id="p-err"></div>
+    <button class="btn block" onclick="savePin()">更新密碼</button>
+    <p class="muted" style="font-size:.9rem;margin:8px 0 0">忘記密碼的話，請會長在「成員管理」幫你重設。</p></div>${navBar()}`;
+}
+async function savePin(){
+  const o=$('#p-old').value.trim(), n=$('#p-new').value.trim(), n2=$('#p-new2').value.trim(), err=$('#p-err');
+  if(!/^\d{4}$/.test(n)){ err.textContent='新密碼要是 4 位數字'; return; }
+  if(n!==n2){ err.textContent='兩次輸入的新密碼不一樣'; return; }
+  if(!navigator.onLine){ err.textContent='修改密碼需要網路'; return; }
+  try{
+    const r=await api({ action:'changePin', token:TOKEN, oldPin:o, newPin:n });
+    if(!r.ok){ if(r.error==='AUTH'){ forceLogout(r.message); return; } err.textContent=r.message||'修改失敗'; return; }
+    go('settings'); toast('🔑 密碼已更新，下次登入請用新密碼');
+  }catch(e){ err.textContent='連線失敗，請稍後再試'; }
+}
+
+function replayTut(){
+  const u=me();
+  if(u.role==='boss'){ u.tutDone=false; go('lobby'); afterLogin(); return; }
+  go('home');
+  elara([
+    '我是精靈嚮導<b>艾拉</b>，再帶你複習一次～',
+    `案件顏色：<br>${badge('doing')} ${badge('won')}<br>${badge('quiet')} ${badge('no')}<br>進行中的案件超過 14 天沒更新，會出現 <span class="warn">⚠ 提醒</span>。`,
+    '按「＋ 新增客戶」建立案件；點進案件可以選階段、微調進度、寫備註。每次更新要寫一句備註或推進階段，階段到「完工」就算成交。',
+    `經驗值：新增客戶 +${XP.add}、到達新階段 +${XP.stage}、寫備註 +${XP.note}、<b>成交 +${XP.won}</b>！`,
+  ], null, {tut:true});
+}
+
+/* ===================== 啟動 ===================== */
+if(TOKEN && me()) ui.page=homePage(); else S.session=null;
+render();
+if(TOKEN) sync(); else loadRoster();
+// 離線快取（Service Worker）：只在網址是 http/https 時啟用
+if('serviceWorker' in navigator && /^https?:/.test(location.protocol)){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  let reloaded=false;
+  navigator.serviceWorker.addEventListener('controllerchange', ()=>{ if(!reloaded && !Q.length && !ui.page?.match(/add|case|edit|create/)){ reloaded=true; location.reload(); } });
+}
+</script>
+</body>
+</html>
