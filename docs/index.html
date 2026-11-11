@@ -109,7 +109,7 @@ h2{font-size:1.1rem;margin:0 0 10px}
 .fab:active{transform:translateX(-50%) translateY(2px)}
 .pulse{animation:pulse 1.2s infinite}
 @keyframes pulse{0%,100%{box-shadow:0 2px 0 var(--gold-d),0 0 0 0 rgba(184,146,74,.8)}50%{box-shadow:0 2px 0 var(--gold-d),0 0 0 14px rgba(184,146,74,0)}}
-.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--navy);display:flex;border-top:4px double var(--gold);z-index:20;padding-bottom:env(safe-area-inset-bottom)}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:var(--navy);display:flex;border-top:4px double var(--gold);z-index:20;padding-bottom:var(--sb)}
 .nav button{flex:1;min-height:72px;background:none;border:none;color:#cfd3e6;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:.95rem}
 .nav button .ic{font-size:1.4rem;line-height:1}
 .nav button.on{color:var(--gold-l);background:rgba(255,255,255,.07)}
@@ -228,6 +228,9 @@ input[type=range]::-moz-range-thumb{width:30px;height:30px;background:var(--card
 .topbar h1{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .net{margin-left:auto;flex-shrink:0;font-size:.8rem;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,.12);color:var(--gold-l);white-space:nowrap;cursor:pointer;font-weight:500}
 .net.off{background:#a5520f;color:#fff}
+.net .ns{display:none}
+@media (max-width:400px){ .topbar .back ~ .net .nl{display:none} .topbar .back ~ .net .ns{display:inline} }
+@media (max-width:460px){ html.big .topbar .back ~ .net .nl{display:none} html.big .topbar .back ~ .net .ns{display:inline} }
 .net.wait{background:#6a4fa8;color:#fff}
 .notice{margin:14px 16px;padding:12px 14px;border-radius:8px;background:#fbf3e0;border:1.5px dashed var(--gold);font-size:.95rem}
 </style>
@@ -654,15 +657,18 @@ function refreshView(){
   if(!S.session) return;
   if(['home','lobby','roster','settings','job'].includes(ui.page) && !document.querySelector('#fx .fxbox') && !dlg) render();
 }
+// 回傳 [樣式, 完整文字, 精簡文字]；窄螢幕有返回鍵的頁面用精簡文字，避免把標題擠掉
 function netLabel(){
-  if(!navigator.onLine || NET==='offline') return ['off', Q.length ? `📴 離線・${Q.length} 筆待同步` : '📴 離線中'];
-  if(NET==='syncing') return ['wait','🔄 同步中…'];
-  if(Q.length) return ['wait', `⏳ ${Q.length} 筆待同步`];
-  if(NET==='error') return ['off','⚠ 同步失敗，稍後重試'];
-  return ['','☁️ 已同步'];
+  const n = Q.length;
+  if(!navigator.onLine || NET==='offline') return ['off', n ? `📴 離線・${n} 筆待同步` : '📴 離線中', n ? `📴 ${n}` : '📴'];
+  if(NET==='syncing') return ['wait','🔄 同步中…','🔄'];
+  if(n) return ['wait', `⏳ ${n} 筆待同步`, `⏳ ${n}`];
+  if(NET==='error') return ['off','⚠ 同步失敗，稍後重試','⚠'];
+  return ['','☁️ 已同步','☁️'];
 }
-function netBadge(){ const [c,t] = netLabel(); return `<span class="net ${c}" id="net" onclick="sync()" title="點一下立即同步">${t}</span>`; }
-function updateNet(){ const el = document.getElementById('net'); if(!el) return; const [c,t] = netLabel(); el.className = 'net '+c; el.textContent = t; }
+const netInner = (t,s) => `<span class="nl">${t}</span><span class="ns">${s}</span>`;
+function netBadge(){ const [c,t,s] = netLabel(); return `<span class="net ${c}" id="net" onclick="sync()" title="${t}（點一下立即同步）">${netInner(t,s)}</span>`; }
+function updateNet(){ const el = document.getElementById('net'); if(!el) return; const [c,t,s] = netLabel(); el.className = 'net '+c; el.innerHTML = netInner(t,s); el.title = t+'（點一下立即同步）'; }
 function forceLogout(msg){ TOKEN = null; S.session = null; persist(); resetUI(); render(); loadRoster(); if(msg) toast(esc(msg)); }
 async function loadRoster(){
   if(!navigator.onLine || !API_URL) return;

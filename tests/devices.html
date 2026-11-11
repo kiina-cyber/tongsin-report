@@ -1,0 +1,72 @@
+<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0">
+<iframe id="app" style="border:0;display:block"></iframe>
+<script src="fake-gas.js"></script><script src="../docs/shared.js"></script><script src="../apps-script/Code.gs"></script>
+<script>
+window.__online=true; window.__alerts=[]; window.__confirm=()=>true; setup();
+const roster=__gasCall({action:'roster'}).users, s1=roster.find(u=>u.name==='業務一號'), boss=roster.find(u=>u.role==='boss');
+const f=document.getElementById('app');
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+window.init=()=>new Promise(r=>{ f.onload=r; f.style.width='390px'; f.style.height='844px'; f.src='_app.html'; });
+window.prepare=async()=>{ const w=f.contentWindow;
+  w.localStorage.clear(); w.pickUser(s1.id); [1,1,1,1].forEach(k=>w.pinKey(k)); await sleep(400);
+  w.dlg=null; w.drawDlg(); w.ui.draft={cls:'knight',g:'m',hair:'short',hc:0,outfit:0}; w.finishCreate(); w.dlg=null; w.drawDlg(); w.ui.tutAdd=false;
+  for(const nm of ['大都會歡唱館連鎖股份有限公司民生分店','星光KTV','海景會館','金鑽商旅','A酒店']){ w.startAdd(); w.document.getElementById('a-name').value=nm; w.addPInput(Object.assign(w.document.getElementById('a-p'),{value:30})); w.addCase(); w.dlg=null; w.drawDlg(); w.document.getElementById('fx').innerHTML=''; }
+  await sleep(1500);
+};
+function setDev(dev, big){
+  const w=f.contentWindow, d=w.document; f.style.width=dev.w+'px'; f.style.height=dev.h+'px';
+  let st=d.getElementById('__ins'); if(!st){ st=d.createElement('style'); st.id='__ins'; d.head.appendChild(st); }
+  st.textContent='html{--st:'+dev.t+'px !important;--sb:'+dev.b+'px !important}';
+  w.S.prefs.big=big; return [w,d];
+}
+// 在某個手機尺寸、字級、網路狀態下量測，回傳問題清單
+window.check=async(dev, big, offline)=>{
+  const [w,d]=setDev(dev,big);
+  window.__online=!offline; w.dispatchEvent(new Event(offline?'offline':'online'));
+  if(offline){ w.openCase(w.S.cases[0].id); d.getElementById('f-note').value='x'; w.saveCase(); d.getElementById('fx').innerHTML=''; }
+  const W=dev.w, H=dev.h, bad=[]; const R=el=>el.getBoundingClientRect();
+  const visTop=el=>R(el).top>=dev.t-0.5, visBottom=el=>R(el).bottom<=H-dev.b+0.5;
+  const pageCheck=async(name, extra)=>{
+    await sleep(60); w.scrollTo(0,0);
+    if(d.documentElement.scrollWidth>W+1) bad.push(name+'：畫面左右超出（'+d.documentElement.scrollWidth+'>'+W+'）');
+    const tb=d.querySelector('.topbar');
+    if(tb){ const h1=tb.querySelector('h1'), net=d.getElementById('net'), back=tb.querySelector('.back');
+      if(!visTop(h1)) bad.push(name+'：標題被瀏海擋住');
+      if(net){ if(!visTop(net)) bad.push(name+'：同步狀態被瀏海擋住'); if(R(net).right>W+0.5) bad.push(name+'：同步狀態超出右邊');
+        if(R(h1).right>R(net).left+0.5) bad.push(name+'：標題和同步狀態重疊');
+        if(h1.clientWidth<70) bad.push(name+'：標題被擠到幾乎看不到（'+h1.clientWidth+'px）'); }
+      if(back && R(back).left<0) bad.push(name+'：返回鍵超出左邊'); }
+    const nav=d.querySelector('.nav');
+    if(nav) nav.querySelectorAll('button').forEach(b=>{ if(!visBottom(b)) bad.push(name+'：底部導覽被橫條擋住'); });
+    w.scrollTo(0,d.documentElement.scrollHeight); await sleep(30);
+    const fab=d.querySelector('.fab'), last=[...d.querySelectorAll('#app > .card, #app > .case, #app > div > .btn')].pop();
+    if(fab){ if(!visBottom(fab)) bad.push(name+'：新增按鈕被橫條擋住'); if(nav && R(fab).bottom>R(nav).top+0.5) bad.push(name+'：新增按鈕壓到導覽列'); }
+    if(last && nav && R(last).bottom>R(nav).top+0.5) bad.push(name+'：捲到底最後一個區塊還被導覽列擋住');
+    if(last && fab && R(last).bottom>R(fab).top+0.5) bad.push(name+'：捲到底最後一張卡片被新增按鈕擋住');
+    if(extra) await extra();
+  };
+  w.go('home'); await pageCheck('首頁', async()=>{
+    w.elara(['測試對話框的長度，看按鈕會不會被下方橫條擋住，也看文字會不會超出畫面。','第二句'], null, {tut:true}); await sleep(30);
+    d.querySelectorAll('.dlg-btns .btn').forEach(b=>{ if(!visBottom(b)) bad.push('艾拉對話框：按鈕被橫條擋住'); if(R(b).height>75) bad.push('艾拉對話框：按鈕文字被擠成兩行'); });
+    const dl=d.querySelector('.dlg'); if(R(dl).top<dev.t) bad.push('艾拉對話框：太高，頂端被瀏海擋住'); w.dlg=null; w.drawDlg();
+    w.toast('✨ +20 XP 新階段　+5 XP 回報備註'); await sleep(20); const t=[...d.querySelectorAll('.toast')].pop(); if(t && !visTop(t)) bad.push('提示訊息被瀏海擋住');
+  });
+  w.openCase(w.S.cases[0].id); await pageCheck('案件頁');
+  w.startAdd(); await pageCheck('新增客戶');
+  w.go('settings'); await pageCheck('設定');
+  w.go('roster'); await pageCheck('名冊');
+  window.__online=true; w.dispatchEvent(new Event('online')); await sleep(150);
+  return bad;
+};
+window.checkLobby=async(dev,big)=>{ const [w,d]=setDev(dev,big); w.go('lobby'); await sleep(80);
+  const bad=[]; if(d.documentElement.scrollWidth>dev.w+1) bad.push('公會大廳：左右超出（'+d.documentElement.scrollWidth+'）');
+  const net=d.getElementById('net'); if(net.getBoundingClientRect().top<dev.t) bad.push('公會大廳：同步狀態被瀏海擋住');
+  d.querySelectorAll('.tile').forEach(t=>{ if(t.scrollWidth>t.clientWidth+1) bad.push('公會大廳：數字方塊文字超出'); });
+  w.go('members'); await sleep(50); if(d.documentElement.scrollWidth>dev.w+1) bad.push('成員管理：左右超出');
+  return bad; };
+window.loginBoss=async()=>{ const w=f.contentWindow; await w.logout(); await sleep(200); w.pickUser(boss.id); [0,0,0,0].forEach(k=>w.pinKey(k)); await sleep(400); w.dlg=null; w.drawDlg(); };
+window.checkLogin=async(dev,big)=>{ const [w,d]=setDev(dev,big); w.render(); await sleep(50);
+  const bad=[], h1=d.querySelector('.hero h1'); if(h1.getBoundingClientRect().top<dev.t) bad.push('登入頁：標題被瀏海擋住');
+  if(d.documentElement.scrollWidth>dev.w+1) bad.push('登入頁：左右超出'); return bad; };
+window.doLogout=async()=>{ await f.contentWindow.logout(); await sleep(200); };
+</script></body></html>
