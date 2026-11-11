@@ -47,10 +47,10 @@
 > 「所有人」的意思是 App 可以連到這個網址；真正的資料仍需要正確的姓名和密碼才看得到。密碼連續錯 5 次會鎖定 10 分鐘。
 
 ### 步驟 4：放上網路（GitHub Pages，免費）
-1. 在 GitHub 建立一個新的 repository，例如 `tongsin-guild`。
+1. 在 GitHub 建立一個新的 repository，例如 `tongsin-report`。
 2. 把整個專案上傳上去（或由 Claude 協助推送）。
 3. 進入 repository 的 **Settings → Pages**，Source 選 `Deploy from a branch`，Branch 選 `main`，資料夾選 **`/docs`**，按 Save。
-4. 等 1～2 分鐘，網址會是 `https://你的帳號.github.io/tongsin-guild/`。把這個網址傳給業務。安裝到手機後，主畫面上的名稱是「**同欣回報**」。
+4. 等 1～2 分鐘，網址會是 `https://kiina-cyber.github.io/tongsin-report/`。把這個網址傳給業務。安裝到手機後，主畫面上的名稱是「**同欣回報**」。
 
 ### 步驟 5：業務安裝到手機主畫面
 - **iPhone**：用 **Safari** 打開網址 → 下方「分享」按鈕 → **加入主畫面**。
