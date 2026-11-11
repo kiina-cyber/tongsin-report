@@ -1,6 +1,6 @@
 /* 離線快取：沒有網路時也能打開 App
    更新 App 檔案後，把 VERSION 的數字加 1，手機下次開啟就會換成新版。 */
-const VERSION = 'tongsin-v1';
+const VERSION = 'tongsin-v2';
 const APP_FILES = ['./', './index.html', './shared.js', './config.js', './manifest.webmanifest',
                    './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png'];
 const RUNTIME = 'tongsin-runtime';     // 字體、Excel 套件：第一次用到時存起來
