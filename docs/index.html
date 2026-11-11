@@ -728,7 +728,7 @@ function loginView(){
     <h1 class="px">同欣冒險者公會</h1>${DIVIDER}<div class="px en">TONGSIN GUILD</div></div>`;
   if(!ui.pick){
     if(!API_URL) return `${hero}<div class="notice">⚙️ 尚未設定伺服器網址。請依照 README 的步驟部署 Google Apps Script，並把網址填進 <b>config.js</b>。</div>`;
-    const sales=ROSTER.filter(u=>u.role==='sales'), boss=ROSTER.find(u=>u.role==='boss');
+    const sales=salesOf(ROSTER), boss=ROSTER.find(u=>u.role==='boss');
     if(!ROSTER.length) return `${hero}<div class="notice">${navigator.onLine ? '正在載入名單…' : '📴 第一次登入需要網路，請連上網路後再打開。'}</div>`;
     return `${hero}<div class="card orn" style="padding:20px 18px"><h2>請選擇你的名字</h2><div class="namegrid">
       ${sales.map(u=>`<button class="btn" onclick="pickUser('${u.id}')">${esc(u.name)}</button>`).join('')}
@@ -920,6 +920,10 @@ function pickOpt(g, v, el){
   else { ui.addStage=v; const n=$('#a-stagenote'); n.style.display = v===OTHER_STAGE ? '' : 'none'; if(v===OTHER_STAGE) n.focus(); }
   document.querySelectorAll(`.opt[data-g="${g}"]`).forEach(b=>b.classList.toggle('on', b===el));
 }
+// 名單一律依中文筆畫排序
+const STROKE = (()=>{ try{ return new Intl.Collator('zh-Hant-TW-u-co-stroke'); }catch(e){ return new Intl.Collator('zh-Hant'); } })();
+const byStroke = (a,b) => STROKE.compare(a.name||'', b.name||'');
+const salesOf = list => list.filter(u=>u.role==='sales').sort(byStroke);
 const catLabel = c => c.cat==='其他' && c.catNote ? `其他：${c.catNote}` : c.cat;
 // 進度範圍：每個案件的階段順序可能不同，所以未完工時可自由微調 0～95%；完工固定 100%（＝成交）
 function pRange(stage){ return stage===STAGES.length-1 ? [100,100] : [0,95]; }
@@ -1116,7 +1120,7 @@ function caseView(){
     <div class="err" id="b-err"></div>
     <button class="btn block" onclick="bossComment()">送出留言</button>
     <div class="f" style="margin:18px 0 0"><span class="flabel">轉派給其他業務</span>
-      <div class="row"><select class="inp" id="b-owner">${S.users.filter(x=>x.role==='sales').map(x=>`<option value="${x.id}" ${x.id===c.owner?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
+      <div class="row"><select class="inp" id="b-owner">${salesOf(S.users).map(x=>`<option value="${x.id}" ${x.id===c.owner?'selected':''}>${esc(x.name)}</option>`).join('')}</select>
       <button class="btn ghost" style="flex:0 0 auto" onclick="transferCase()">轉派</button></div></div>
     ${c.dealXP?`<button class="btn danger block" style="margin-top:18px" onclick="revokeDeal('${c.id}')">撤銷成交（扣回 ${XP.won} XP）</button>`:''}
   </div>`:''}
@@ -1223,7 +1227,7 @@ function revokeDeal(id){
 
 /* ===================== 老闆：公會大廳 ===================== */
 function lobbyView(){
-  const all=S.cases, sales=S.users.filter(u=>u.role==='sales');
+  const all=S.cases, sales=salesOf(S.users);
   const n=k=> k==='stale'?all.filter(isStale).length : k==='all'?all.length : all.filter(c=>c.st===k).length;
   const tiles=[['doing','進行中','var(--red)'],['won','已成交','var(--green)'],['quiet','暫無回應','var(--blue)'],
                ['no','無意願','var(--gray)'],['stale','⚠ 逾期','var(--warn)'],['all','全部案件','var(--navy)']];
@@ -1263,7 +1267,7 @@ function lobbyView(){
 }
 function monthCard(){
   const now=new Date(), mo=ui.mon||0, a=new Date(now.getFullYear(),now.getMonth()-mo,1).getTime(), b=new Date(now.getFullYear(),now.getMonth()-mo+1,1).getTime();
-  const inR=t=>t&&t>=a&&t<b, sales=S.users.filter(u=>u.role==='sales');
+  const inR=t=>t&&t>=a&&t<b, sales=salesOf(S.users);
   const nw=S.cases.filter(c=>inR(c.created)), wn=S.cases.filter(c=>inR(c.wonAt)), label=`${new Date(a).getMonth()+1} 月`;
   return `<div class="card">
     <div class="row" style="margin-bottom:12px">${[['本月',0],['上個月',1]].map(([l,v])=>`<button class="chip ${mo===v?'on':''}" style="flex:1;justify-content:center" onclick="ui.mon=${v};render()">${l}</button>`).join('')}</div>
@@ -1289,7 +1293,7 @@ function drawLobbyList(){
 function exportExcel(){
   const d=t=>{ if(!t) return ''; const x=new Date(t), p=n=>String(n).padStart(2,'0'); return `${x.getFullYear()}/${p(x.getMonth()+1)}/${p(x.getDate())} ${p(x.getHours())}:${p(x.getMinutes())}`; };
   const name=id=>{ const u=userById(id); return !u ? '' : u.role==='boss' ? '會長' : u.name; };
-  const sorted=S.cases.slice().sort((a,b)=>name(a.owner).localeCompare(name(b.owner),'zh-Hant')||b.updated-a.updated);
+  const sorted=S.cases.slice().sort((a,b)=>STROKE.compare(name(a.owner),name(b.owner))||b.updated-a.updated);
   const cases=sorted.map(c=>({ '客戶名稱':c.name, '負責業務':name(c.owner), '服務類別':catLabel(c), '目前階段':stageLabel(c), '整體進度(%)':c.p,
     '狀態':STATUS[c.st].n, '聯絡人':c.contact||'', '電話':c.phone||'', '地址':c.addr||'', '建立日期':d(c.created), '最後更新':d(c.updated),
     '未更新天數':daysSince(c.updated), '逾期提醒':isStale(c)?'是':'', '成交日期':d(c.wonAt) }));
@@ -1297,7 +1301,7 @@ function exportExcel(){
     '類型':x.kind==='boss'?'會長留言':'進度更新', '階段':x.kind==='boss'?'':stageLabel(x), '進度(%)':x.kind==='boss'?'':x.p,
     '狀態':x.kind==='boss'?'':STATUS[x.st].n, '備註／留言':x.note||'' })));
   const now=new Date(), m0=new Date(now.getFullYear(),now.getMonth(),1).getTime();
-  const stats=S.users.filter(u=>u.role==='sales').map(u=>{ const m=S.cases.filter(c=>c.owner===u.id), k=s=>m.filter(c=>c.st===s).length;
+  const stats=salesOf(S.users).map(u=>{ const m=S.cases.filter(c=>c.owner===u.id), k=s=>m.filter(c=>c.st===s).length;
     return { '業務':u.name, '等級':lvInfo(u.xp).lv, '稱號':u.char?jobInfo(u).name:'（尚未建立角色）', '案件數':m.length, '進行中':k('doing'), '已成交':k('won'),
       '暫無回應':k('quiet'), '無意願':k('no'), '逾期未更新':m.filter(isStale).length,
       '本月新增':m.filter(c=>c.created>=m0).length, '本月成交':m.filter(c=>c.wonAt&&c.wonAt>=m0).length }; });
@@ -1320,14 +1324,14 @@ function exportExcel(){
 /* ===================== 公會名冊 ===================== */
 function rosterView(){
   const boss=S.users.find(u=>u.role==='boss');
-  const sales=S.users.filter(u=>u.role==='sales').sort((a,b)=>a.name.localeCompare(b.name,'zh-Hant'));
+  const sales=salesOf(S.users);
   const row=u=>{ const L=lvInfo(u.xp);
     return `<div class="card member">${avatar(u,44)}<div style="flex:1;min-width:0">
       <div class="px ptitle">${u.role==='boss'?'👑 公會會長':titleOf(u)}</div>
       <div class="pname" style="font-size:1.15rem">${u.role==='boss'?'公會會長（老闆）':esc(u.name)}${u.role==='boss'?'':`<span class="px lv">Lv.${L.lv}</span>`}</div>
       ${u.role!=='boss'&&!u.char?'<div class="muted">尚未建立角色</div>':''}</div></div>`; };
   return `<div class="topbar"><h1 class="px">🏰 公會名冊</h1>${netBadge()}</div>
-    <p class="hint">同欣冒險者公會的所有成員（依姓名排列）</p>
+    <p class="hint">同欣冒險者公會的所有成員（依姓名筆畫排列）</p>
     ${row(boss)}${sales.map(row).join('')}${navBar()}`;
 }
 
@@ -1359,7 +1363,7 @@ function settingsView(){
 /* ===================== 成員管理（會長）與修改密碼 ===================== */
 const needNet = () => navigator.onLine ? '' : '<div class="notice">📴 這個功能需要網路，請連上網路後再操作。</div>';
 function membersView(){
-  const list=(S.members||[]).slice().sort((a,b)=>(b.active-a.active)||((a.role==='boss'?0:1)-(b.role==='boss'?0:1))||a.name.localeCompare(b.name,'zh-Hant'));
+  const list=(S.members||[]).slice().sort((a,b)=>(b.active-a.active)||((a.role==='boss'?0:1)-(b.role==='boss'?0:1))||byStroke(a,b));
   const owned=id=>S.cases.filter(c=>c.owner===id).length;
   return `<div class="topbar"><button class="back" onclick="go('settings')">← 返回</button><h1 class="px">👥 成員管理</h1>${netBadge()}</div>
   ${needNet()}
